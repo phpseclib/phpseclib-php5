@@ -113,6 +113,26 @@ define('CRYPT_MODE_MCRYPT', 2);
 /**#@-*/
 
 /**
+ * UndefinedMethodException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package Crypt_Base
+ */
+class UndefinedMethodException extends Exception {}
+
+/**
+ * InvalidLengthException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package Crypt_Base
+ */
+class InvalidLengthException extends Exception {}
+
+/**
  * Base Class for all Crypt_* cipher classes
  *
  * @author  Jim Wigginton <terrafrost@php.net>
@@ -1167,7 +1187,7 @@ class Crypt_Base {
      */
     function _encryptBlock($in)
     {
-        user_error((version_compare(PHP_VERSION, '5.0.0', '>=')  ? __METHOD__ : __FUNCTION__)  . '() must extend by class ' . get_class($this), E_USER_ERROR);
+        throw new UndefinedMethodException(__METHOD__ . '() must extend by class ' . get_class($this));
     }
 
     /**
@@ -1181,7 +1201,7 @@ class Crypt_Base {
      */
     function _decryptBlock($in)
     {
-        user_error((version_compare(PHP_VERSION, '5.0.0', '>=')  ? __METHOD__ : __FUNCTION__)  . '() must extend by class ' . get_class($this), E_USER_ERROR);
+        throw new UndefinedMethodException(__METHOD__ . '() must extend by class ' . get_class($this));
     }
 
     /**
@@ -1196,7 +1216,7 @@ class Crypt_Base {
      */
     function _setupKey()
     {
-        user_error((version_compare(PHP_VERSION, '5.0.0', '>=')  ? __METHOD__ : __FUNCTION__)  . '() must extend by class ' . get_class($this), E_USER_ERROR);
+        throw new UndefinedMethodException(__METHOD__ . '() must extend by class ' . get_class($this));
     }
 
     /**
@@ -1315,8 +1335,7 @@ class Crypt_Base {
             if ($length % $this->block_size == 0) {
                 return $text;
             } else {
-                user_error("The plaintext's length ($length) is not a multiple of the block size ({$this->block_size})");
-                $this->padding = true;
+                throw new InvalidLengthException("The plaintext's length ($length) is not a multiple of the block size ({$this->block_size})");
             }
         }
 
