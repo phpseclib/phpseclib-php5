@@ -239,6 +239,86 @@ define('CRYPT_RSA_PUBLIC_FORMAT_PKCS1', 7);
 /**#@-*/
 
 /**
+ * MultiPrimeNotSupportedException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package Crypt_RSA
+ */
+class MultiPrimeNotSupportedException extends Exception {}
+
+/**
+ * FormatNotSupportedException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package Crypt_RSA
+ */
+class FormatNotSupportedException extends Exception {}
+
+/**
+ * KeyNotLoadedException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package Crypt_RSA
+ */
+class KeyNotLoadedException extends Exception {}
+
+/**
+ * EncryptionException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package Crypt_RSA
+ */
+class EncryptionException extends Exception {}
+
+/**
+ * DecryptionException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package Crypt_RSA
+ */
+class DecryptionException extends Exception {}
+
+/**
+ * SigningException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package Crypt_RSA
+ */
+class SigningException extends Exception {}
+
+/**
+ * VerificationException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package Crypt_RSA
+ */
+class VerificationException extends Exception {}
+
+/**
+ * EncodingException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package Crypt_RSA
+ */
+class EncodingException extends Exception {}
+
+/**
  * Pure-PHP PKCS#1 compliant implementation of RSA.
  *
  * @author  Jim Wigginton <terrafrost@php.net>
@@ -700,7 +780,7 @@ class Crypt_RSA {
         switch ($this->privateKeyFormat) {
             case CRYPT_RSA_PRIVATE_FORMAT_XML:
                 if ($num_primes != 2) {
-                    return false;
+                    throw new MultiPrimeNotSupportedException('Multi-prime RSA is not supported by XML keys');
                 }
                 return "<RSAKeyValue>\r\n" .
                        '  <Modulus>' . base64_encode($raw['modulus']) . "</Modulus>\r\n" .
@@ -715,7 +795,7 @@ class Crypt_RSA {
                 break;
             case CRYPT_RSA_PRIVATE_FORMAT_PUTTY:
                 if ($num_primes != 2) {
-                    return false;
+                    throw new MultiPrimeNotSupportedException('Multi-prime RSA is not supported by PuTTY keys');
                 }
                 $key = "PuTTY-User-Key-File-2: ssh-rsa\r\nEncryption: ";
                 $encryption = (!empty($this->password) || is_string($this->password)) ? 'aes256-cbc' : 'none';
@@ -904,13 +984,13 @@ class Crypt_RSA {
     function _parseKey($key, $type)
     {
         if ($type != CRYPT_RSA_PUBLIC_FORMAT_RAW && !is_string($key)) {
-            return false;
+            throw new FormatNotSupportedException('Unable to parse unsupported key format');
         }
 
         switch ($type) {
             case CRYPT_RSA_PUBLIC_FORMAT_RAW:
                 if (!is_array($key)) {
-                    return false;
+                    throw new FormatNotSupportedException('Raw: Expected array type');
                 }
                 $components = array();
                 switch (true) {
@@ -1000,11 +1080,15 @@ class Crypt_RSA {
                             $crypto = new Crypt_DES();
                             break;
                         default:
-                            return false;
+                            throw new FormatNotSupportedException("PKCS1: $matches[1] is an unsupported cipher");
                     }
                     $crypto->setKey($symkey);
                     $crypto->setIV($iv);
-                    $decoded = $crypto->decrypt($ciphertext);
+                    try {
+                        $decoded = $crypto->decrypt($ciphertext);
+                    } catch (InvalidPaddingException $e) {
+                        $decoded = false;
+                    }
                 } else {
                     $decoded = preg_replace('#-.+-|[\r\n]| #', '', $key);
                     $decoded = preg_match('#^[a-zA-Z\d/+]*={0,2}$#', $decoded) ? base64_decode($decoded) : false;
@@ -1017,10 +1101,10 @@ class Crypt_RSA {
                 $components = array();
 
                 if (ord($this->_string_shift($key)) != CRYPT_RSA_ASN1_SEQUENCE) {
-                    return false;
+                    throw new FormatNotSupportedException('PKCS1: Expected a SEQUENCE tag');
                 }
                 if ($this->_decodeLength($key) != strlen($key)) {
-                    return false;
+                    throw new FormatNotSupportedException('PKCS1: Tag length does not match key length');
                 }
 
                 $tag = ord($this->_string_shift($key));
@@ -1056,15 +1140,15 @@ class Crypt_RSA {
                         $this->_string_shift($key);
                     }
                     if (ord($this->_string_shift($key)) != CRYPT_RSA_ASN1_SEQUENCE) {
-                        return false;
+                        throw new FormatNotSupportedException('PKCS1: Expected a second SEQUENCE tag');
                     }
                     if ($this->_decodeLength($key) != strlen($key)) {
-                        return false;
+                        throw new FormatNotSupportedException('PKCS1: Tag length and key length should match');
                     }
                     $tag = ord($this->_string_shift($key));
                 }
                 if ($tag != CRYPT_RSA_ASN1_INTEGER) {
-                    return false;
+                    throw new FormatNotSupportedException('PKCS1: Expected an INTEGER tag');
                 }
 
                 $length = $this->_decodeLength($key);
@@ -1078,7 +1162,7 @@ class Crypt_RSA {
                     return $components;
                 }
                 if (ord($this->_string_shift($key)) != CRYPT_RSA_ASN1_INTEGER) {
-                    return false;
+                    throw new FormatNotSupportedException('PKCS1: Expected a second INTEGER tag');
                 }
                 $length = $this->_decodeLength($key);
                 $components['modulus'] = new Math_BigInteger($this->_string_shift($key, $length), 256);
@@ -1106,12 +1190,12 @@ class Crypt_RSA {
 
                 if (!empty($key)) {
                     if (ord($this->_string_shift($key)) != CRYPT_RSA_ASN1_SEQUENCE) {
-                        return false;
+                        throw new FormatNotSupportedException('PKCS1: Expected another SEQUENCE tag');
                     }
                     $this->_decodeLength($key);
                     while (!empty($key)) {
                         if (ord($this->_string_shift($key)) != CRYPT_RSA_ASN1_SEQUENCE) {
-                            return false;
+                            throw new FormatNotSupportedException('PKCS1: Expected yet another SEQUENCE tag');
                         }
                         $this->_decodeLength($key);
                         $key = substr($key, 1);
@@ -1132,7 +1216,7 @@ class Crypt_RSA {
 
                 $key = isset($parts[1]) ? base64_decode($parts[1]) : false;
                 if ($key === false) {
-                    return false;
+                    throw new FormatNotSupportedException('OpenSSH public: Public key not present or badly formated');
                 }
 
                 $comment = isset($parts[2]) ? $parts[2] : false;
@@ -1140,29 +1224,35 @@ class Crypt_RSA {
                 $cleanup = substr($key, 0, 11) == "\0\0\0\7ssh-rsa";
 
                 if (strlen($key) <= 4) {
-                    return false;
+                    throw new FormatNotSupportedException('OpenSSH public: Key data too short');
                 }
                 extract(unpack('Nlength', $this->_string_shift($key, 4)));
                 $publicExponent = new Math_BigInteger($this->_string_shift($key, $length), -256);
                 if (strlen($key) <= 4) {
-                    return false;
+                    throw new FormatNotSupportedException('OpenSSH public: public exponent data too short');
                 }
                 extract(unpack('Nlength', $this->_string_shift($key, 4)));
                 $modulus = new Math_BigInteger($this->_string_shift($key, $length), -256);
 
                 if ($cleanup && strlen($key)) {
                     if (strlen($key) <= 4) {
-                        return false;
+                        throw new FormatNotSupportedException('OpenSSH public: data too short');
                     }
                     extract(unpack('Nlength', $this->_string_shift($key, 4)));
                     $realModulus = new Math_BigInteger($this->_string_shift($key, $length), -256);
-                    return strlen($key) ? false : array(
+                    if (strlen($key)) {
+                        throw new FormatNotSupportedException('OpenSSH public: Junk key data present');
+                    }
+                    return array(
                         'modulus' => $realModulus,
                         'publicExponent' => $modulus,
                         'comment' => $comment
                     );
                 } else {
-                    return strlen($key) ? false : array(
+                    if (strlen($key)) {
+                        throw new FormatNotSupportedException('OpenSSH public: Extra key data present');
+                    }
+                    return array(
                         'modulus' => $modulus,
                         'publicExponent' => $publicExponent,
                         'comment' => $comment
@@ -1180,7 +1270,7 @@ class Crypt_RSA {
                 xml_set_character_data_handler($xml, '_data_handler');
                 // add <xml></xml> to account for "dangling" tags like <BitStrength>...</BitStrength> that are sometimes added
                 if (!xml_parse($xml, '<xml>' . $key . '</xml>')) {
-                    return false;
+                    throw new FormatNotSupportedException('XML: Unable to parse key');
                 }
 
                 return isset($this->components['modulus']) && isset($this->components['publicExponent']) ? $this->components : false;
@@ -1190,7 +1280,7 @@ class Crypt_RSA {
                 $key = preg_split('#\r\n|\r|\n#', $key);
                 $type = trim(preg_replace('#PuTTY-User-Key-File-2: (.+)#', '$1', $key[0]));
                 if ($type != 'ssh-rsa') {
-                    return false;
+                    throw new FormatNotSupportedException('PuTTY: Only ssh-rsa keys are supported');
                 }
                 $encryption = trim(preg_replace('#Encryption: (.+)#', '$1', $key[1]));
                 $comment = trim(preg_replace('#Comment: (.+)#', '$1', $key[2]));
@@ -1225,24 +1315,21 @@ class Crypt_RSA {
                     $crypto->setKey($symkey);
                     $crypto->disablePadding();
                     $private = $crypto->decrypt($private);
-                    if ($private === false) {
-                        return false;
-                    }
                 }
 
                 extract(unpack('Nlength', $this->_string_shift($private, 4)));
                 if (strlen($private) < $length) {
-                    return false;
+                    throw new FormatNotSupportedException('PuTTY: length not long enough');
                 }
                 $components['privateExponent'] = new Math_BigInteger($this->_string_shift($private, $length), -256);
                 extract(unpack('Nlength', $this->_string_shift($private, 4)));
                 if (strlen($private) < $length) {
-                    return false;
+                    throw new FormatNotSupportedException('PuTTY: length not long enough');
                 }
                 $components['primes'] = array(1 => new Math_BigInteger($this->_string_shift($private, $length), -256));
                 extract(unpack('Nlength', $this->_string_shift($private, 4)));
                 if (strlen($private) < $length) {
-                    return false;
+                    throw new FormatNotSupportedException('PuTTY: length not long enough');
                 }
                 $components['primes'][] = new Math_BigInteger($this->_string_shift($private, $length), -256);
 
@@ -1253,7 +1340,7 @@ class Crypt_RSA {
 
                 extract(unpack('Nlength', $this->_string_shift($private, 4)));
                 if (strlen($private) < $length) {
-                    return false;
+                    throw new FormatNotSupportedException('PuTTY: length not long enough');
                 }
                 $components['coefficients'] = array(2 => new Math_BigInteger($this->_string_shift($private, $length), -256));
 
@@ -1371,18 +1458,17 @@ class Crypt_RSA {
                 CRYPT_RSA_PUBLIC_FORMAT_OPENSSH
             );
             foreach ($types as $type) {
-                $components = $this->_parseKey($key, $type);
-                if ($components !== false) {
+                try {
+                    $components = $this->_parseKey($key, $type);
                     break;
+                } catch (FormatNotSupportedException $e) {
                 }
             }
-            
+            if (!isset($components)) {
+                throw new FormatNotSupportedException('Unable to find matching format');
+            }
         } else {
             $components = $this->_parseKey($key, $type);
-        }
-
-        if ($components === false) {
-            return false;
         }
 
         if (isset($components['comment']) && $components['comment'] !== false) {
@@ -1456,17 +1542,17 @@ class Crypt_RSA {
                 CRYPT_RSA_PUBLIC_FORMAT_OPENSSH
             );
             foreach ($types as $type) {
-                $components = $this->_parseKey($key, $type);
-                if ($components !== false) {
+                try {
+                    $components = $this->_parseKey($key, $type);
                     break;
+                } catch (FormatNotSupportedException $e) {
                 }
+            }
+            if (!isset($components)) {
+                throw new FormatNotSupportedException('Unable to find matching format');
             }
         } else {
             $components = $this->_parseKey($key, $type);
-        }
-
-        if ($components === false) {
-            return false;
         }
 
         if (empty($this->modulus) || !$this->modulus->equals($components['modulus'])) {
@@ -1495,7 +1581,7 @@ class Crypt_RSA {
     function getPublicKey($type = CRYPT_RSA_PUBLIC_FORMAT_PKCS1)
     {
         if (empty($this->modulus) || empty($this->publicExponent)) {
-            return false;
+            throw new KeyNotLoadedException('No public key has been loaded. Maybe you need to call setPublicKey()?');
         }
 
         $oldFormat = $this->publicKeyFormat;
@@ -1518,7 +1604,7 @@ class Crypt_RSA {
     function getPrivateKey($type = CRYPT_RSA_PUBLIC_FORMAT_PKCS1)
     {
         if (empty($this->primes)) {
-            return false;
+            throw new KeyNotLoadedException('No private key has been loaded.');
         }
 
         $oldFormat = $this->privateKeyFormat;
@@ -1542,7 +1628,7 @@ class Crypt_RSA {
     function _getPrivatePublicKey($mode = CRYPT_RSA_PUBLIC_FORMAT_PKCS1)
     {
         if (empty($this->modulus) || empty($this->exponent)) {
-            return false;
+            throw new KeyNotLoadedException('No private key has been loaded.');
         }
 
         $oldFormat = $this->publicKeyFormat;
@@ -1559,12 +1645,11 @@ class Crypt_RSA {
      */
     function __toString()
     {
-        $key = $this->getPrivateKey($this->privateKeyFormat);
-        if ($key !== false) {
-            return $key;
+        try {
+            return $this->getPrivateKey($this->privateKeyFormat);
+        } catch (KeyNotLoadedException $e) {
+            return $this->_getPrivatePublicKey($this->publicKeyFormat);
         }
-        $key = $this->_getPrivatePublicKey($this->publicKeyFormat);
-        return $key !== false ? $key : '';
     }
 
     /**
@@ -1761,8 +1846,7 @@ class Crypt_RSA {
     {
         $x = $x->toBytes();
         if (strlen($x) > $xLen) {
-            user_error('Integer too large');
-            return false;
+            throw new EncodingException('Integer too large');
         }
         return str_pad($x, $xLen, chr(0), STR_PAD_LEFT);
     }
@@ -1922,8 +2006,7 @@ class Crypt_RSA {
     function _rsaep($m)
     {
         if ($m->compare($this->zero) < 0 || $m->compare($this->modulus) > 0) {
-            user_error('Message representative out of range');
-            return false;
+            throw new EncryptionException('Message representative out of range');
         }
         return $this->_exponentiate($m);
     }
@@ -1940,8 +2023,7 @@ class Crypt_RSA {
     function _rsadp($c)
     {
         if ($c->compare($this->zero) < 0 || $c->compare($this->modulus) > 0) {
-            user_error('Ciphertext representative out of range');
-            return false;
+            throw new DecryptionException('Ciphertext representative out of range');
         }
         return $this->_exponentiate($c);
     }
@@ -1958,8 +2040,7 @@ class Crypt_RSA {
     function _rsasp1($m)
     {
         if ($m->compare($this->zero) < 0 || $m->compare($this->modulus) > 0) {
-            user_error('Message representative out of range');
-            return false;
+            throw new SigningException('Message representative out of range');
         }
         return $this->_exponentiate($m);
     }
@@ -1976,7 +2057,7 @@ class Crypt_RSA {
     function _rsavp1($s)
     {
         if ($s->compare($this->zero) < 0 || $s->compare($this->modulus) > 0) {
-            user_error('Signature representative out of range');
+            throw new VerificationException('Signature representative out of range');
             return false;
         }
         return $this->_exponentiate($s);
@@ -2027,8 +2108,7 @@ class Crypt_RSA {
         // be output.
 
         if ($mLen > $this->k - 2 * $this->hLen - 2) {
-            user_error('Message too long');
-            return false;
+            throw new EncryptionException('Message too long');
         }
 
         // EME-OAEP encoding
@@ -2088,8 +2168,7 @@ class Crypt_RSA {
         // be output.
 
         if (strlen($c) != $this->k || $this->k < 2 * $this->hLen + 2) {
-            user_error('Decryption error');
-            return false;
+            throw new DecryptionException('Decryption error');
         }
 
         // RSA decryption
@@ -2097,8 +2176,7 @@ class Crypt_RSA {
         $c = $this->_os2ip($c);
         $m = $this->_rsadp($c);
         if ($m === false) {
-            user_error('Decryption error');
-            return false;
+            throw new DecryptionException('Decryption error');
         }
         $em = $this->_i2osp($m, $this->k);
 
@@ -2115,13 +2193,11 @@ class Crypt_RSA {
         $lHash2 = substr($db, 0, $this->hLen);
         $m = substr($db, $this->hLen);
         if ($lHash != $lHash2) {
-            user_error('Decryption error');
-            return false;
+            throw new DecryptionException('Decryption error');
         }
         $m = ltrim($m, chr(0));
         if (ord($m[0]) != 1) {
-            user_error('Decryption error');
-            return false;
+            throw new DecryptionException('Decryption error');
         }
 
         // Output the message M
@@ -2145,8 +2221,7 @@ class Crypt_RSA {
         // Length checking
 
         if ($mLen > $this->k - 11) {
-            user_error('Message too long');
-            return false;
+            throw new EncryptionException('Message too long');
         }
 
         // EME-PKCS1-v1_5 encoding
@@ -2202,8 +2277,7 @@ class Crypt_RSA {
         // Length checking
 
         if (strlen($c) != $this->k) { // or if k < 11
-            user_error('Decryption error');
-            return false;
+            throw new DecryptionException('Decryption error');
         }
 
         // RSA decryption
@@ -2212,24 +2286,21 @@ class Crypt_RSA {
         $m = $this->_rsadp($c);
 
         if ($m === false) {
-            user_error('Decryption error');
-            return false;
+            throw new DecryptionException('Decryption error');
         }
         $em = $this->_i2osp($m, $this->k);
 
         // EME-PKCS1-v1_5 decoding
 
         if (ord($em[0]) != 0 || ord($em[1]) > 2) {
-            user_error('Decryption error');
-            return false;
+            throw new DecryptionException('Decryption error');
         }
 
         $ps = substr($em, 2, strpos($em, chr(0), 2) - 2);
         $m = substr($em, strlen($ps) + 3);
 
         if (strlen($ps) < 8) {
-            user_error('Decryption error');
-            return false;
+            throw new DecryptionException('Decryption error');
         }
 
         // Output M
@@ -2256,8 +2327,7 @@ class Crypt_RSA {
 
         $mHash = $this->hash->hash($m);
         if ($emLen < $this->hLen + $sLen + 2) {
-            user_error('Encoding error');
-            return false;
+            throw new SigningException('Encoding error');
         }
 
         $salt = crypt_random_string($sLen);
@@ -2361,8 +2431,7 @@ class Crypt_RSA {
         // Length checking
 
         if (strlen($s) != $this->k) {
-            user_error('Invalid signature');
-            return false;
+            throw new VerificationException('Invalid signature');
         }
 
         // RSA verification
@@ -2372,13 +2441,11 @@ class Crypt_RSA {
         $s2 = $this->_os2ip($s);
         $m2 = $this->_rsavp1($s2);
         if ($m2 === false) {
-            user_error('Invalid signature');
-            return false;
+            throw new VerificationException('Invalid signature');
         }
         $em = $this->_i2osp($m2, $modBits >> 3);
         if ($em === false) {
-            user_error('Invalid signature');
-            return false;
+            throw new VerificationException('Invalid signature');
         }
 
         // EMSA-PSS verification
@@ -2427,8 +2494,7 @@ class Crypt_RSA {
         $tLen = strlen($t);
 
         if ($emLen < $tLen + 11) {
-            user_error('Intended encoded message length too short');
-            return false;
+            throw new EncodingException('Intended encoded message length too short');
         }
 
         $ps = str_repeat(chr(0xFF), $emLen - $tLen - 3);
@@ -2453,8 +2519,7 @@ class Crypt_RSA {
 
         $em = $this->_emsa_pkcs1_v1_5_encode($m, $this->k);
         if ($em === false) {
-            user_error('RSA modulus too short');
-            return false;
+            throw new SigningException('RSA modulus too short');
         }
 
         // RSA signature
@@ -2482,7 +2547,7 @@ class Crypt_RSA {
         // Length checking
 
         if (strlen($s) != $this->k) {
-            user_error('Invalid signature');
+            throw new VerificationException('Invalid signature');
             return false;
         }
 
@@ -2491,20 +2556,18 @@ class Crypt_RSA {
         $s = $this->_os2ip($s);
         $m2 = $this->_rsavp1($s);
         if ($m2 === false) {
-            user_error('Invalid signature');
-            return false;
+            throw new VerificationException('Invalid signature');
         }
         $em = $this->_i2osp($m2, $this->k);
         if ($em === false) {
-            user_error('Invalid signature');
-            return false;
+            throw new VerificationException('Invalid signature');
         }
 
         // EMSA-PKCS1-v1_5 encoding
 
         $em2 = $this->_emsa_pkcs1_v1_5_encode($m, $this->k);
         if ($em2 === false) {
-            user_error('RSA modulus too short');
+            throw new VerificationException('RSA modulus too short');
             return false;
         }
 

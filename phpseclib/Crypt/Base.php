@@ -133,6 +133,16 @@ class UndefinedMethodException extends Exception {}
 class InvalidLengthException extends Exception {}
 
 /**
+ * InvalidPaddingException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package Crypt_Base
+ */
+class InvalidPaddingException extends Exception {}
+
+/**
  * Base Class for all Crypt_* cipher classes
  *
  * @author  Jim Wigginton <terrafrost@php.net>
@@ -141,7 +151,7 @@ class InvalidLengthException extends Exception {}
  * @access  public
  * @package Crypt_Base
  */
-class Crypt_Base {
+abstract class Crypt_Base {
     /**
      * The Encryption Mode
      *
@@ -1364,7 +1374,7 @@ class Crypt_Base {
         $length = ord($text[strlen($text) - 1]);
 
         if (!$length || $length > $this->block_size) {
-            return false;
+            throw new InvalidPaddingException("An illegal padding character ($length) has been detected");
         }
 
         return substr($text, 0, -$length);
