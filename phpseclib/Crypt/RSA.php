@@ -319,6 +319,16 @@ class VerificationException extends Exception {}
 class EncodingException extends Exception {}
 
 /**
+ * BadPasswordException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package Crypt_RSA
+ */
+class BadPasswordException extends Exception {}
+
+/**
  * Pure-PHP PKCS#1 compliant implementation of RSA.
  *
  * @author  Jim Wigginton <terrafrost@php.net>
@@ -1037,7 +1047,8 @@ class Crypt_RSA {
                    implementation are part of the standard, as well.
 
                    * OpenSSL is the de facto standard.  It's utilized by OpenSSH and other projects */
-                if (preg_match('#DEK-Info: (.+),(.+)#', $key, $matches)) {
+                $is_encrypted = preg_match('#DEK-Info: (.+),(.+)#', $key, $matches);
+                if ($is_encrypted) {
                     $iv = pack('H*', trim($matches[2]));
                     $symkey = pack('H*', md5($this->password . substr($iv, 0, 8))); // symkey is short for symmetric key
                     $symkey.= pack('H*', md5($symkey . $this->password . substr($iv, 0, 8)));
@@ -1101,10 +1112,14 @@ class Crypt_RSA {
                 $components = array();
 
                 if (ord($this->_string_shift($key)) != CRYPT_RSA_ASN1_SEQUENCE) {
-                    throw new FormatNotSupportedException('PKCS1: Expected a SEQUENCE tag');
+                    throw $is_encrypted ?
+                        new BadPasswordException('Unable to decode key. Likely cause: bad password') :
+                        new FormatNotSupportedException('PKCS1: Expected a SEQUENCE tag');
                 }
                 if ($this->_decodeLength($key) != strlen($key)) {
-                    throw new FormatNotSupportedException('PKCS1: Tag length does not match key length');
+                    throw $is_encrypted ?
+                        new BadPasswordException('Unable to decode key. Likely cause: bad password') :
+                        new FormatNotSupportedException('PKCS1: Tag length does not match key length');
                 }
 
                 $tag = ord($this->_string_shift($key));
@@ -1140,15 +1155,21 @@ class Crypt_RSA {
                         $this->_string_shift($key);
                     }
                     if (ord($this->_string_shift($key)) != CRYPT_RSA_ASN1_SEQUENCE) {
-                        throw new FormatNotSupportedException('PKCS1: Expected a second SEQUENCE tag');
+                        throw $is_encrypted ?
+                            new BadPasswordException('Unable to decode key. Likely cause: bad password') :
+                            new FormatNotSupportedException('PKCS1: Expected a second SEQUENCE tag');
                     }
                     if ($this->_decodeLength($key) != strlen($key)) {
-                        throw new FormatNotSupportedException('PKCS1: Tag length and key length should match');
+                        throw $is_encrypted ?
+                            new BadPasswordException('Unable to decode key. Likely cause: bad password') :
+                            new FormatNotSupportedException('PKCS1: Tag length and key length should match');
                     }
                     $tag = ord($this->_string_shift($key));
                 }
                 if ($tag != CRYPT_RSA_ASN1_INTEGER) {
-                    throw new FormatNotSupportedException('PKCS1: Expected an INTEGER tag');
+                    throw $is_encrypted ?
+                        new BadPasswordException('Unable to decode key. Likely cause: bad password') :
+                        new FormatNotSupportedException('PKCS1: Expected an INTEGER tag');
                 }
 
                 $length = $this->_decodeLength($key);
@@ -1162,7 +1183,9 @@ class Crypt_RSA {
                     return $components;
                 }
                 if (ord($this->_string_shift($key)) != CRYPT_RSA_ASN1_INTEGER) {
-                    throw new FormatNotSupportedException('PKCS1: Expected a second INTEGER tag');
+                    throw $is_encrypted ?
+                        new BadPasswordException('Unable to decode key. Likely cause: bad password') :
+                        new FormatNotSupportedException('PKCS1: Expected a second INTEGER tag');
                 }
                 $length = $this->_decodeLength($key);
                 $components['modulus'] = new Math_BigInteger($this->_string_shift($key, $length), 256);
@@ -1190,12 +1213,16 @@ class Crypt_RSA {
 
                 if (!empty($key)) {
                     if (ord($this->_string_shift($key)) != CRYPT_RSA_ASN1_SEQUENCE) {
-                        throw new FormatNotSupportedException('PKCS1: Expected another SEQUENCE tag');
+                        throw $is_encrypted ?
+                            new BadPasswordException('Unable to decode key. Likely cause: bad password') :
+                            new FormatNotSupportedException('PKCS1: Expected another SEQUENCE tag');
                     }
                     $this->_decodeLength($key);
                     while (!empty($key)) {
                         if (ord($this->_string_shift($key)) != CRYPT_RSA_ASN1_SEQUENCE) {
-                            throw new FormatNotSupportedException('PKCS1: Expected yet another SEQUENCE tag');
+                            throw $is_encrypted ?
+                                new BadPasswordException('Unable to decode key. Likely cause: bad password') :
+                                new FormatNotSupportedException('PKCS1: Expected yet another SEQUENCE tag');
                         }
                         $this->_decodeLength($key);
                         $key = substr($key, 1);
@@ -1311,25 +1338,36 @@ class Crypt_RSA {
                         $crypto = new Crypt_AES();
                 }
 
-                if ($encryption != 'none') {
+                $is_encrypted = $encryption != 'none';
+                if ($is_encrypted) {
                     $crypto->setKey($symkey);
                     $crypto->disablePadding();
-                    $private = $crypto->decrypt($private);
+                    try {
+                        $private = $crypto->decrypt($private);
+                    } catch (InvalidPaddingException $e) {
+                        throw new BadPasswordException('Unable to decode key. Likely cause: bad password');
+                    }
                 }
 
                 extract(unpack('Nlength', $this->_string_shift($private, 4)));
                 if (strlen($private) < $length) {
-                    throw new FormatNotSupportedException('PuTTY: length not long enough');
+                    throw $is_encrypted ?
+                        new BadPasswordException('Unable to decode key. Likely cause: bad password') :
+                        new FormatNotSupportedException('PuTTY: length not long enough');
                 }
                 $components['privateExponent'] = new Math_BigInteger($this->_string_shift($private, $length), -256);
                 extract(unpack('Nlength', $this->_string_shift($private, 4)));
                 if (strlen($private) < $length) {
-                    throw new FormatNotSupportedException('PuTTY: length not long enough');
+                    throw $is_encrypted ?
+                        new BadPasswordException('Unable to decode key. Likely cause: bad password') :
+                        new FormatNotSupportedException('PuTTY: length not long enough');
                 }
                 $components['primes'] = array(1 => new Math_BigInteger($this->_string_shift($private, $length), -256));
                 extract(unpack('Nlength', $this->_string_shift($private, 4)));
                 if (strlen($private) < $length) {
-                    throw new FormatNotSupportedException('PuTTY: length not long enough');
+                    throw $is_encrypted ?
+                        new BadPasswordException('Unable to decode key. Likely cause: bad password') :
+                        new FormatNotSupportedException('PuTTY: length not long enough');
                 }
                 $components['primes'][] = new Math_BigInteger($this->_string_shift($private, $length), -256);
 
@@ -1340,7 +1378,9 @@ class Crypt_RSA {
 
                 extract(unpack('Nlength', $this->_string_shift($private, 4)));
                 if (strlen($private) < $length) {
-                    throw new FormatNotSupportedException('PuTTY: length not long enough');
+                    throw $is_encrypted ?
+                        new BadPasswordException('Unable to decode key. Likely cause: bad password') :
+                        new FormatNotSupportedException('PuTTY: length not long enough');
                 }
                 $components['coefficients'] = array(2 => new Math_BigInteger($this->_string_shift($private, $length), -256));
 
