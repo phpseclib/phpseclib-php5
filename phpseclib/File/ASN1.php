@@ -107,6 +107,16 @@ define('FILE_ASN1_TYPE_ANY',             -2);
 /**#@-*/
 
 /**
+ * ASN1ParseException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package File_ASN1
+ */
+class ASN1ParseException extends Exception {}
+
+/**
  * ASN.1 Element
  *
  * Bypass normal encoding rules in File_ASN1::encodeDER()
@@ -975,8 +985,7 @@ class File_ASN1 {
             case FILE_ASN1_TYPE_OBJECT_IDENTIFIER:
                 $oid = preg_match('#(?:\d+\.)+#', $source) ? $source : array_search($source, $this->oids);
                 if ($oid === false) {
-                    user_error('Invalid OID');
-                    return false;
+                    throw new ASN1ParseException('Invalid OID');
                 }
                 $value = '';
                 $parts = explode('.', $oid);
@@ -1028,8 +1037,7 @@ class File_ASN1 {
                     $filters = $filters[$part];
                 }
                 if ($filters === false) {
-                    user_error('No filters defined for ' . implode('/', $loc));
-                    return false;
+                    throw new ASN1ParseException('No filters defined for ' . implode('/', $loc));
                 }
                 return $this->_encode_der($source, $filters + $mapping);
             case FILE_ASN1_TYPE_NULL:
@@ -1052,8 +1060,7 @@ class File_ASN1 {
                 $value = $source ? "\xFF" : "\x00";
                 break;
             default:
-                user_error('Mapping provides no type definition for ' . implode('/', $this->location));
-                return false;
+                throw new ASN1ParseException('Mapping provides no type definition for ' . implode('/', $this->location));
         }
 
         if (isset($idx)) {

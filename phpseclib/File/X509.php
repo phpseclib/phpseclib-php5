@@ -122,6 +122,36 @@ define('FILE_X509_ATTR_APPEND', -2); // Add a value.
 define('FILE_X509_ATTR_REPLACE', -3); // Clear first, then add a value.
 
 /**
+ * MalformedX509Exception
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package File_X509
+ */
+class MalformedX509Exception extends Exception {}
+
+/**
+ * CertNotLoadedException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package File_X509
+ */
+class CertNotLoadedException extends Exception {}
+
+/**
+ * UnsupportedAlgorithmException
+ *
+ * @author  Jim Wigginton <terrafrost@php.net>
+ * @version 0.3.5
+ * @access  public
+ * @package File_X509
+ */
+class UnsupportedAlgorithmException extends Exception {}
+
+/**
  * Pure-PHP X.509 Parser
  *
  * @author  Jim Wigginton <terrafrost@php.net>
@@ -1422,7 +1452,7 @@ class File_X509 {
             unset($this->currentKeyIdentifier);
             $this->dn = $cert['tbsCertificate']['subject'];
             if (!isset($this->dn)) {
-                return false;
+                throw new MalformedX509Exception('No distinguished name found in X.509 array');
             }
             $this->currentCert = $cert;
 
@@ -1440,7 +1470,7 @@ class File_X509 {
 
         if ($cert === false) {
             $this->currentCert = false;
-            return false;
+            throw new MalformedX509Exception('Unable to decode ASN.1');
         }
 
         $asn1->loadOIDs($this->oids);
@@ -1451,7 +1481,7 @@ class File_X509 {
         }
         if (!isset($x509) || $x509 === false) {
             $this->currentCert = false;
-            return false;
+            throw new MalformedX509Exception('Unable to map BER-decoded data to X.509 format');
         }
 
         $this->signatureSubject = substr($cert, $decoded[0]['content'][0]['start'], $decoded[0]['content'][0]['length']);
@@ -1636,7 +1666,7 @@ class File_X509 {
                 $map = $this->_getMapping($id);
                 if (is_bool($map)) {
                     if (!$map) {
-                        user_error($id . ' is not a currently supported extension');
+                        //user_error($id . ' is not a currently supported extension');
                         unset($extensions[$i]);
                     }
                 } else {
@@ -1709,7 +1739,7 @@ class File_X509 {
                 $id = $attributes[$i]['type'];
                 $map = $this->_getMapping($id);
                 if ($map === false) {
-                    user_error($id . ' is not a currently supported attribute', E_USER_NOTICE);
+                    //user_error($id . ' is not a currently supported attribute', E_USER_NOTICE);
                     unset($attributes[$i]);
                 }
                 elseif (is_array($attributes[$i]['value'])) {
@@ -1849,7 +1879,7 @@ class File_X509 {
             $this->signatureSubject = $oldsigsubj;
             $this->currentKeyIdentifier = $oldkeyid;
 
-            return false;
+            throw new MalformedX509Exception('Unable to load X.509 CA');
         }
 
         /* From RFC5280 "PKIX Certificate and CRL Profile":
@@ -1905,7 +1935,7 @@ class File_X509 {
     function validateURL($url)
     {
         if (!is_array($this->currentCert) || !isset($this->currentCert['tbsCertificate'])) {
-            return false;
+            throw new CertNotLoadedException();
         }
 
         $components = parse_url($url);
@@ -1962,7 +1992,7 @@ class File_X509 {
     function validateDate($date = NULL)
     {
         if (!is_array($this->currentCert) || !isset($this->currentCert['tbsCertificate'])) {
-            return false;
+            throw new CertNotLoadedException();
         }
 
         if (!isset($date)) {
@@ -2002,7 +2032,7 @@ class File_X509 {
     function validateSignature($caonly = true)
     {
         if (!is_array($this->currentCert) || !isset($this->signatureSubject)) {
-            return 0;
+            throw new CertNotLoadedException();
         }
 
         /* TODO:
@@ -2138,11 +2168,11 @@ class File_X509 {
                         }
                         break;
                     default:
-                        return NULL;
+                        throw new UnsupportedAlgorithmException('Signature algorithm unsupported');
                 }
                 break;
             default:
-                return NULL;
+                throw new UnsupportedAlgorithmException('Public key algorithm unsupported');
         }
 
         return true;
@@ -2740,14 +2770,17 @@ class File_X509 {
             return $this->publicKey;
         }
 
-        if (isset($this->currentCert) && is_array($this->currentCert)) {
-            foreach (array('tbsCertificate/subjectPublicKeyInfo', 'certificationRequestInfo/subjectPKInfo') as $path) {
-                $keyinfo = $this->_subArray($this->currentCert, $path);
-                if (!empty($keyinfo)) {
-                    break;
-                }
+        if (!isset($this->currentCert) || !is_array($this->currentCert)) {
+            throw new CertNotLoadedException();
+        }
+
+        foreach (array('tbsCertificate/subjectPublicKeyInfo', 'certificationRequestInfo/subjectPKInfo') as $path) {
+            $keyinfo = $this->_subArray($this->currentCert, $path);
+            if (!empty($keyinfo)) {
+                break;
             }
         }
+
         if (empty($keyinfo)) {
             return false;
         }
@@ -2801,7 +2834,7 @@ class File_X509 {
 
         if ($csr === false) {
             $this->currentCert = false;
-            return false;
+            throw new MalformedX509Exception('Unable to decode ASN.1');
         }
 
         $asn1->loadOIDs($this->oids);
@@ -2815,7 +2848,7 @@ class File_X509 {
         $csr = $asn1->asn1map($decoded[0], $this->CertificationRequest);
         if (!isset($csr) || $csr === false) {
             $this->currentCert = false;
-            return false;
+            throw new MalformedX509Exception('Unable to map BER-decoded data to CSR format');
         }
 
         $this->dn = $csr['certificationRequestInfo']['subject'];
@@ -2928,7 +2961,7 @@ class File_X509 {
 
         if ($csr === false) {
             $this->currentCert = false;
-            return false;
+            throw new MalformedX509Exception('Unable to decode base64');
         }
 
         $asn1->loadOIDs($this->oids);
@@ -2936,14 +2969,14 @@ class File_X509 {
 
         if (empty($decoded)) {
             $this->currentCert = false;
-            return false;
+            throw new MalformedX509Exception('Unable to decode ASN.1');
         }
 
         $csr = $asn1->asn1map($decoded[0], $this->SignedPublicKeyAndChallenge);
 
         if (!isset($csr) || $csr === false) {
             $this->currentCert = false;
-            return false;
+            throw new MalformedX509Exception('Unable to map BER-decoded data to SPKAC format');
         }
 
         $this->signatureSubject = substr($orig, $decoded[0]['content'][0]['start'], $decoded[0]['content'][0]['length']);
@@ -2993,7 +3026,7 @@ class File_X509 {
 
         if ($crl === false) {
             $this->currentCert = false;
-            return false;
+            throw new MalformedX509Exception('Unable to decode base64');
         }
 
         $asn1->loadOIDs($this->oids);
@@ -3001,13 +3034,13 @@ class File_X509 {
 
         if (empty($decoded)) {
             $this->currentCert = false;
-            return false;
+            throw new MalformedX509Exception('Unable to decode ASN.1');
         }
 
         $crl = $asn1->asn1map($decoded[0], $this->CertificateList);
         if (!isset($crl) || $crl === false) {
             $this->currentCert = false;
-            return false;
+            throw new MalformedX509Exception('Unable to map BER-decoded data to X.509 format');
         }
 
         $this->signatureSubject = substr($orig, $decoded[0]['content'][0]['start'], $decoded[0]['content'][0]['length']);
@@ -3037,7 +3070,7 @@ class File_X509 {
     function saveCRL($crl, $format = FILE_X509_FORMAT_PEM)
     {
         if (!is_array($crl) || !isset($crl['tbsCertList'])) {
-            return false;
+            throw new CertNotLoadedException();
         }
 
         $asn1 = new File_ASN1();
@@ -3097,11 +3130,11 @@ class File_X509 {
     function sign($issuer, $subject, $signatureAlgorithm = 'sha1WithRSAEncryption')
     {
         if (!is_object($issuer->privateKey) || empty($issuer->dn)) {
-            return false;
+            throw new CertNotLoadedException('Invalid issuer data');
         }
 
         if (isset($subject->publicKey) && !($subjectPublicKey = $subject->_formatSubjectPublicKey())) {
-            return false;
+            throw new CertNotLoadedException('Invalid subject data');
         }
 
         $currentCert = isset($this->currentCert) ? $this->currentCert : NULL;
@@ -3134,10 +3167,10 @@ class File_X509 {
                 $this->removeExtension('id-ce-subjectAltName');
             }
         } else if (isset($subject->currentCert) && is_array($subject->currentCert) && isset($subject->currentCert['tbsCertList'])) {
-            return false;
+            throw new CertNotLoadedException('To sign a CRL use signCRL');
         } else {
             if (!isset($subject->publicKey)) {
-                return false;
+                throw new CertNotLoadedException('Subject public key not loaded');
             }
 
             $startDate = !empty($this->startDate) ? $this->startDate : @date('D, d M y H:i:s O');
@@ -3244,7 +3277,7 @@ class File_X509 {
     function signCSR($signatureAlgorithm = 'sha1WithRSAEncryption')
     {
         if (!is_object($this->privateKey) || empty($this->dn)) {
-            return false;
+            throw new CertNotLoadedException();
         }
 
         $origPublicKey = $this->publicKey;
@@ -3308,7 +3341,7 @@ class File_X509 {
     function signCRL($issuer, $crl, $signatureAlgorithm = 'sha1WithRSAEncryption')
     {
         if (!is_object($issuer->privateKey) || empty($issuer->dn)) {
-            return false;
+            throw new CertNotLoadedException();
         }
 
         $currentCert = isset($this->currentCert) ? $this->currentCert : NULL;
@@ -3451,7 +3484,7 @@ class File_X509 {
                         return $this->currentCert;
                 }
             default:
-                return false;
+                throw new UnsupportedAlgorithmException('Unsupported public key algorithm');
         }
     }
 
@@ -3785,7 +3818,7 @@ class File_X509 {
         $attributes = &$this->_subArray($this->currentCert, 'certificationRequestInfo/attributes');
 
         if (!is_array($attributes)) {
-            return false;
+            throw new CertNotLoadedException();
         }
 
         $result = false;
@@ -3840,7 +3873,7 @@ class File_X509 {
         $attributes = $this->_subArray($csr, 'certificationRequestInfo/attributes');
 
         if (!is_array($attributes)) {
-            return false;
+            throw new CertNotLoadedException();
         }
 
         foreach ($attributes as $key => $attribute) {
@@ -3903,7 +3936,7 @@ class File_X509 {
         $attributes = &$this->_subArray($this->currentCert, 'certificationRequestInfo/attributes', true);
 
         if (!is_array($attributes)) {
-            return false;
+            throw new CertNotLoadedException();
         }
 
         switch ($disposition) {
@@ -4078,7 +4111,7 @@ class File_X509 {
                     'subjectPublicKey' => $this->publicKey->getPublicKey(CRYPT_RSA_PUBLIC_FORMAT_PKCS1_RAW)
                 );
             default:
-                return false;
+                throw new UnsupportedAlgorithmException('Unsupported public key algorithm');
         }
     }
 
