@@ -1,5 +1,5 @@
 {
-    "name": "phpseclib/phpseclib",
+    "name": "PhpSecLib/PhpSecLib",
     "type": "library",
     "description": "PHP Secure Communications Library - Pure-PHP implementations of RSA, AES, SSH2, SFTP, X.509 etc.",
     "keywords": [
@@ -19,7 +19,7 @@
         "asn.1",
         "BigInteger"
         ],
-    "homepage": "http://phpseclib.sourceforge.net",
+    "homepage": "http://PhpSecLib.sourceforge.net",
     "license": "MIT",
     "authors": [
         {
@@ -34,18 +34,15 @@
     "suggest": {
         "ext-mcrypt": "Install the Mcrypt extension in order to speed up a wide variety of cryptographic operations.",
         "ext-gmp": "Install the GMP (GNU Multiple Precision) extension in order to speed up arbitrary precision integer arithmetic operations.",
-        "pear-pear/PHP_Compat": "Install PHP_Compat to get phpseclib working on PHP >= 4.3.3." 
+        "pear-pear/PHP_Compat": "Install PHP_Compat to get PhpSecLib working on PHP >= 4.3.3."
     },
-    "include-path": ["phpseclib/"],
+    "include-path": ["PhpSecLib/"],
     "autoload": {
         "psr-0": {
-            "Crypt": "phpseclib/",
-            "File": "phpseclib/",
-            "Math": "phpseclib/",
-            "Net": "phpseclib/"
+            "PhpSecLib": "src/"
         },
         "files": [
-            "phpseclib/Crypt/Random.php"
+            "src/PhpSecLib/Crypt/Random.php"
         ]
     },
     "extra": {

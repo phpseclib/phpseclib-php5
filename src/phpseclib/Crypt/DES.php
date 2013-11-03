@@ -1,6 +1,8 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
+namespace PhpSecLib\Crypt;
+
 /**
  * Pure-PHP implementation of DES.
  *
@@ -19,7 +21,7 @@
  * <?php
  *    include('Crypt/DES.php');
  *
- *    $des = new Crypt_DES();
+ *    $des = new DES();
  *
  *    $des->setKey('abcdefgh');
  *
@@ -52,89 +54,21 @@
  * THE SOFTWARE.
  *
  * @category   Crypt
- * @package    Crypt_DES
+ * @package    DES
  * @author     Jim Wigginton <terrafrost@php.net>
  * @copyright  MMVII Jim Wigginton
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link       http://phpseclib.sourceforge.net
+ * @link       http://PhpSecLib.sourceforge.net
  */
 
 /**
- * Include Crypt_Base
+ * Include Base
  *
  * Base cipher class
  */
-if (!class_exists('Crypt_Base')) {
+if (!class_exists('Base')) {
     require_once('Base.php');
 }
-
-/**#@+
- * @access private
- * @see Crypt_DES::_setupKey()
- * @see Crypt_DES::_processBlock()
- */
-/**
- * Contains $keys[CRYPT_DES_ENCRYPT]
- */
-define('CRYPT_DES_ENCRYPT', 0);
-/**
- * Contains $keys[CRYPT_DES_DECRYPT]
- */
-define('CRYPT_DES_DECRYPT', 1);
-/**#@-*/
-
-/**#@+
- * @access public
- * @see Crypt_DES::encrypt()
- * @see Crypt_DES::decrypt()
- */
-/**
- * Encrypt / decrypt using the Counter mode.
- *
- * Set to -1 since that's what Crypt/Random.php uses to index the CTR mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
- */
-define('CRYPT_DES_MODE_CTR', CRYPT_MODE_CTR);
-/**
- * Encrypt / decrypt using the Electronic Code Book mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
- */
-define('CRYPT_DES_MODE_ECB', CRYPT_MODE_ECB);
-/**
- * Encrypt / decrypt using the Code Book Chaining mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
- */
-define('CRYPT_DES_MODE_CBC', CRYPT_MODE_CBC);
-/**
- * Encrypt / decrypt using the Cipher Feedback mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
- */
-define('CRYPT_DES_MODE_CFB', CRYPT_MODE_CFB);
-/**
- * Encrypt / decrypt using the Cipher Feedback mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
- */
-define('CRYPT_DES_MODE_OFB', CRYPT_MODE_OFB);
-/**#@-*/
-
-/**#@+
- * @access private
- * @see Crypt_DES::Crypt_DES()
- */
-/**
- * Toggles the internal implementation
- */
-define('CRYPT_DES_MODE_INTERNAL', CRYPT_MODE_INTERNAL);
-/**
- * Toggles the mcrypt implementation
- */
-define('CRYPT_DES_MODE_MCRYPT', CRYPT_MODE_MCRYPT);
-/**#@-*/
 
 /**
  * Pure-PHP implementation of DES.
@@ -142,9 +76,77 @@ define('CRYPT_DES_MODE_MCRYPT', CRYPT_MODE_MCRYPT);
  * @author  Jim Wigginton <terrafrost@php.net>
  * @version 0.1.0
  * @access  public
- * @package Crypt_DES
+ * @package DES
  */
-class Crypt_DES extends Crypt_Base {
+class DES extends Base {
+    /**#@+
+     * @access private
+     * @see Crypt_DES::_setupKey()
+     * @see Crypt_DES::_processBlock()
+     */
+    /**
+     * Contains $keys[CRYPT_DES_ENCRYPT]
+     */
+    const CRYPT_DES_ENCRYPT = 0;
+    /**
+     * Contains $keys[CRYPT_DES_DECRYPT]
+     */
+    const CRYPT_DES_DECRYPT = 1;
+    /**#@-*/
+
+    /**#@+
+     * @access public
+     * @see Crypt_DES::encrypt()
+     * @see Crypt_DES::decrypt()
+     */
+    /**
+     * Encrypt / decrypt using the Counter mode.
+     *
+     * Set to -1 since that's what Crypt/Random.php uses to index the CTR mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
+     */
+    const CRYPT_DES_MODE_CTR = self::CRYPT_MODE_CTR;
+    /**
+     * Encrypt / decrypt using the Electronic Code Book mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
+     */
+    const CRYPT_DES_MODE_ECB = self::CRYPT_MODE_ECB;
+    /**
+     * Encrypt / decrypt using the Code Book Chaining mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
+     */
+    const CRYPT_DES_MODE_CBC = self::CRYPT_MODE_CBC;
+    /**
+     * Encrypt / decrypt using the Cipher Feedback mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
+     */
+    const CRYPT_DES_MODE_CFB = self::CRYPT_MODE_CFB;
+    /**
+     * Encrypt / decrypt using the Cipher Feedback mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
+     */
+    const CRYPT_DES_MODE_OFB = self::CRYPT_MODE_OFB;
+    /**#@-*/
+
+    /**#@+
+     * @access private
+     * @see Crypt_DES::Crypt_DES()
+     */
+    /**
+     * Toggles the internal implementation
+     */
+    const CRYPT_DES_MODE_INTERNAL = self::CRYPT_MODE_INTERNAL;
+    /**
+     * Toggles the mcrypt implementation
+     */
+    const CRYPT_DES_MODE_MCRYPT = self::CRYPT_MODE_MCRYPT;
+    /**#@-*/
+
     /**
      * Block Length of the cipher
      *
@@ -685,9 +687,9 @@ class Crypt_DES extends Crypt_Base {
      * @param optional Integer $mode
      * @access public
      */
-    function Crypt_DES($mode = CRYPT_DES_MODE_CBC)
+    function __construct($mode = self::CRYPT_DES_MODE_CBC)
     {
-        parent::Crypt_Base($mode);
+        parent::__construct($mode);
     }
 
     /**
@@ -729,7 +731,7 @@ class Crypt_DES extends Crypt_Base {
      */
     function _encryptBlock($in)
     {
-        return $this->_processBlock($in, CRYPT_DES_ENCRYPT);
+        return $this->_processBlock($in, self::CRYPT_DES_ENCRYPT);
     }
 
     /**
@@ -744,7 +746,7 @@ class Crypt_DES extends Crypt_Base {
      */
     function _decryptBlock($in)
     {
-        return $this->_processBlock($in, CRYPT_DES_DECRYPT);
+        return $this->_processBlock($in, self::CRYPT_DES_DECRYPT);
     }
 
     /**
@@ -1320,8 +1322,8 @@ class Crypt_DES extends Crypt_Base {
             $d = (($key['d'] >> 4) & 0x0FFFFFF0) | ($key['c'] & 0x0F);
 
             $keys[$des_round] = array(
-                CRYPT_DES_ENCRYPT => array(),
-                CRYPT_DES_DECRYPT => array_fill(0, 32, 0)
+                self::CRYPT_DES_ENCRYPT => array(),
+                self::CRYPT_DES_DECRYPT => array_fill(0, 32, 0)
             );
             for ($i = 0, $ki = 31; $i < 16; ++$i, $ki-= 2) {
                 $c <<= $shifts[$i];
@@ -1336,11 +1338,11 @@ class Crypt_DES extends Crypt_Base {
                       $pc2mapd3[($d >>  8) & 0xFF] | $pc2mapd4[ $d        & 0xFF];
 
                 // Reorder: odd bytes/even bytes. Push the result in key schedule.
-                $keys[$des_round][CRYPT_DES_ENCRYPT][       ] =
-                $keys[$des_round][CRYPT_DES_DECRYPT][$ki - 1] = ( $cp        & 0xFF000000) | (($cp <<  8) & 0x00FF0000) |
+                $keys[$des_round][self::CRYPT_DES_ENCRYPT][       ] =
+                $keys[$des_round][self::CRYPT_DES_DECRYPT][$ki - 1] = ( $cp        & 0xFF000000) | (($cp <<  8) & 0x00FF0000) |
                                                                 (($dp >> 16) & 0x0000FF00) | (($dp >>  8) & 0x000000FF);
-                $keys[$des_round][CRYPT_DES_ENCRYPT][       ] =
-                $keys[$des_round][CRYPT_DES_DECRYPT][$ki    ] = (($cp <<  8) & 0xFF000000) | (($cp << 16) & 0x00FF0000) |
+                $keys[$des_round][self::CRYPT_DES_ENCRYPT][       ] =
+                $keys[$des_round][self::CRYPT_DES_DECRYPT][$ki    ] = (($cp <<  8) & 0xFF000000) | (($cp << 16) & 0x00FF0000) |
                                                                 (($dp >>  8) & 0x0000FF00) | ( $dp        & 0x000000FF);
             }
         }
@@ -1348,23 +1350,23 @@ class Crypt_DES extends Crypt_Base {
         switch ($this->des_rounds) {
             case 3: // 3DES keys
                 $this->keys = array(
-                    CRYPT_DES_ENCRYPT => array_merge(
-                        $keys[0][CRYPT_DES_ENCRYPT],
-                        $keys[1][CRYPT_DES_DECRYPT],
-                        $keys[2][CRYPT_DES_ENCRYPT]
+                    self::CRYPT_DES_ENCRYPT => array_merge(
+                        $keys[0][self::CRYPT_DES_ENCRYPT],
+                        $keys[1][self::CRYPT_DES_DECRYPT],
+                        $keys[2][self::CRYPT_DES_ENCRYPT]
                     ),
-                    CRYPT_DES_DECRYPT => array_merge(
-                        $keys[2][CRYPT_DES_DECRYPT],
-                        $keys[1][CRYPT_DES_ENCRYPT],
-                        $keys[0][CRYPT_DES_DECRYPT]
+                    self::CRYPT_DES_DECRYPT => array_merge(
+                        $keys[2][self::CRYPT_DES_DECRYPT],
+                        $keys[1][self::CRYPT_DES_ENCRYPT],
+                        $keys[0][self::CRYPT_DES_DECRYPT]
                     )
                 );
                 break;
             // case 1: // DES keys
             default:
                 $this->keys = array(
-                    CRYPT_DES_ENCRYPT => $keys[0][CRYPT_DES_ENCRYPT],
-                    CRYPT_DES_DECRYPT => $keys[0][CRYPT_DES_DECRYPT]
+                    self::CRYPT_DES_ENCRYPT => $keys[0][self::CRYPT_DES_ENCRYPT],
+                    self::CRYPT_DES_DECRYPT => $keys[0][self::CRYPT_DES_DECRYPT]
                 );
         }
     }
@@ -1377,7 +1379,7 @@ class Crypt_DES extends Crypt_Base {
      */
     function _setupInlineCrypt()
     {
-        $lambda_functions =& Crypt_DES::_getLambdaFunctions();
+        $lambda_functions =& DES::_getLambdaFunctions();
 
         // Engine configuration for:
         // -  DES ($des_rounds == 1) or
@@ -1393,13 +1395,13 @@ class Crypt_DES extends Crypt_Base {
             case $gen_hi_opt_code:
                 // For hi-optimized code, we create for each combination of
                 // $mode, $des_rounds and $this->key its own encrypt/decrypt function.
-                $code_hash = md5(str_pad("Crypt_DES, $des_rounds, {$this->mode}, ", 32, "\0") . $this->key);
+                $code_hash = md5(str_pad("DES, $des_rounds, {$this->mode}, ", 32, "\0") . $this->key);
                 break;
             default:
                 // After max 10 hi-optimized functions, we create generic
                 // (still very fast.. but not ultra) functions for each $mode/$des_rounds
                 // Currently 2 * 5 generic functions will be then max. possible.
-                $code_hash = "Crypt_DES, $des_rounds, {$this->mode}";
+                $code_hash = "DES, $des_rounds, {$this->mode}";
         }
 
         // Is there a re-usable $lambda_functions in there? If not, we have to create it.
@@ -1429,8 +1431,8 @@ class Crypt_DES extends Crypt_Base {
                     // No futher initialisation of the $keys schedule is necessary.
                     // That is the extra performance boost.
                     $k = array(
-                        CRYPT_DES_ENCRYPT => $this->keys[CRYPT_DES_ENCRYPT],
-                        CRYPT_DES_DECRYPT => $this->keys[CRYPT_DES_DECRYPT]
+                        self::CRYPT_DES_ENCRYPT => $this->keys[self::CRYPT_DES_ENCRYPT],
+                        self::CRYPT_DES_DECRYPT => $this->keys[self::CRYPT_DES_DECRYPT]
                     );
                     $init_encrypt = '';
                     $init_decrypt = '';
@@ -1439,21 +1441,21 @@ class Crypt_DES extends Crypt_Base {
                     // In generic optimized code mode, we have to use, as the best compromise [currently],
                     // our key schedule as $ke/$kd arrays. (with hardcoded indexes...)
                     $k = array(
-                        CRYPT_DES_ENCRYPT => array(),
-                        CRYPT_DES_DECRYPT => array()
+                        self::CRYPT_DES_ENCRYPT => array(),
+                        self::CRYPT_DES_DECRYPT => array()
                     );
-                    for ($i = 0, $c = count($this->keys[CRYPT_DES_ENCRYPT]); $i < $c; ++$i) {
-                        $k[CRYPT_DES_ENCRYPT][$i] = '$ke[' . $i . ']';
-                        $k[CRYPT_DES_DECRYPT][$i] = '$kd[' . $i . ']';
+                    for ($i = 0, $c = count($this->keys[self::CRYPT_DES_ENCRYPT]); $i < $c; ++$i) {
+                        $k[self::CRYPT_DES_ENCRYPT][$i] = '$ke[' . $i . ']';
+                        $k[self::CRYPT_DES_DECRYPT][$i] = '$kd[' . $i . ']';
                     }
-                    $init_encrypt = '$ke = $self->keys[CRYPT_DES_ENCRYPT];';
-                    $init_decrypt = '$kd = $self->keys[CRYPT_DES_DECRYPT];';
+                    $init_encrypt = '$ke = $self->keys[self::CRYPT_DES_ENCRYPT];';
+                    $init_decrypt = '$kd = $self->keys[self::CRYPT_DES_DECRYPT];';
                     break;
             }
 
             // Creating code for en- and decryption.
             $crypt_block = array();
-            foreach (array(CRYPT_DES_ENCRYPT, CRYPT_DES_DECRYPT) as $c) {
+            foreach (array(self::CRYPT_DES_ENCRYPT, self::CRYPT_DES_DECRYPT) as $c) {
 
                 /* Do the initial IP permutation. */
                 $crypt_block[$c] = '
@@ -1521,8 +1523,8 @@ class Crypt_DES extends Crypt_Base {
                    'init_crypt'    => $init_crypt,
                    'init_encrypt'  => $init_encrypt,
                    'init_decrypt'  => $init_decrypt,
-                   'encrypt_block' => $crypt_block[CRYPT_DES_ENCRYPT],
-                   'decrypt_block' => $crypt_block[CRYPT_DES_DECRYPT]
+                   'encrypt_block' => $crypt_block[self::CRYPT_DES_ENCRYPT],
+                   'decrypt_block' => $crypt_block[self::CRYPT_DES_DECRYPT]
                 )
             );
         }

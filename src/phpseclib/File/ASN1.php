@@ -1,6 +1,8 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
+namespace PhpSecLib\File;
+
 /**
  * Pure-PHP ASN.1 Parser
  *
@@ -10,7 +12,7 @@
  * utilized scheme is DER or the "Distinguished Encoding Rules".  PEM's are base64 encoded
  * DER blobs.
  *
- * File_ASN1 decodes and encodes DER formatted messages and places them in a semantic context.
+ * ASN1 decodes and encodes DER formatted messages and places them in a semantic context.
  *
  * Uses the 1988 ASN.1 syntax.
  *
@@ -33,11 +35,11 @@
  * THE SOFTWARE.
  *
  * @category   File
- * @package    File_ASN1
+ * @package    ASN1
  * @author     Jim Wigginton <terrafrost@php.net>
  * @copyright  MMXII Jim Wigginton
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link       http://phpseclib.sourceforge.net
+ * @link       http://PhpSecLib.sourceforge.net
  */
 
 /**#@+
@@ -46,6 +48,8 @@
  * @access private
  * @link http://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf#page=12
  */
+use Exception;
+
 define('FILE_ASN1_CLASS_UNIVERSAL',        0);
 define('FILE_ASN1_CLASS_APPLICATION',      1);
 define('FILE_ASN1_CLASS_CONTEXT_SPECIFIC', 2);
@@ -112,41 +116,9 @@ define('FILE_ASN1_TYPE_ANY',             -2);
  * @author  Jim Wigginton <terrafrost@php.net>
  * @version 0.3.5
  * @access  public
- * @package File_ASN1
+ * @package ASN1
  */
 class ASN1ParseException extends Exception {}
-
-/**
- * ASN.1 Element
- *
- * Bypass normal encoding rules in File_ASN1::encodeDER()
- *
- * @author  Jim Wigginton <terrafrost@php.net>
- * @version 0.3.0
- * @access  public
- * @package File_ASN1
- */
-class File_ASN1_Element {
-    /**
-     * Raw element value
-     *
-     * @var String
-     * @access private
-     */
-    var $element;
-
-    /**
-     * Constructor
-     *
-     * @param String $encoded
-     * @return File_ASN1_Element
-     * @access public
-     */
-    function File_ASN1_Element($encoded)
-    {
-        $this->element = $encoded;
-    }
-}
 
 /**
  * Pure-PHP ASN.1 Parser
@@ -154,9 +126,9 @@ class File_ASN1_Element {
  * @author  Jim Wigginton <terrafrost@php.net>
  * @version 0.3.0
  * @access  public
- * @package File_ASN1
+ * @package ASN1
  */
-class File_ASN1 {
+class ASN1 {
     /**
      * ASN.1 object identifier
      *
@@ -261,7 +233,7 @@ class File_ASN1 {
         static $static_init = null;
         if (!$static_init) {
             $static_init = true;
-            if (!class_exists('Math_BigInteger')) {
+            if (!class_exists('BigInteger')) {
                 require_once('Math/BigInteger.php');
             }
         }

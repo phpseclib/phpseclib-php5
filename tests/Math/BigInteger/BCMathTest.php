@@ -1,4 +1,6 @@
 <?php
+use PhpSecLib\Math\BigInteger;
+
 /**
  * @author     Andreas Fischer <bantu@phpbb.com>
  * @copyright  MMXIII Andreas Fischer
@@ -16,6 +18,6 @@ class Math_BigInteger_BCMathTest extends Math_BigInteger_TestCase
 
 		parent::setUpBeforeClass();
 
-		self::ensureConstant('MATH_BIGINTEGER_MODE', MATH_BIGINTEGER_MODE_BCMATH);
+		self::ensureConstant('MATH_BIGINTEGER_MODE', BigInteger::MATH_BIGINTEGER_MODE_BCMATH);
 	}
 }

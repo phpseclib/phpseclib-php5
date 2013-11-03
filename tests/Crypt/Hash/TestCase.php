@@ -1,4 +1,6 @@
 <?php
+use PhpSecLib\Crypt\Hash;
+
 /**
  * @author     Andreas Fischer <bantu@phpbb.com>
  * @copyright  MMXII Andreas Fischer
@@ -9,23 +11,21 @@ abstract class Crypt_Hash_TestCase extends PhpseclibTestCase
 {
 	static public function setUpBeforeClass()
 	{
-		require_once('Crypt/Hash.php');
-
-		if (!defined('CRYPT_HASH_MODE'))
+		if (!defined('Hash_MODE'))
 		{
-			define('CRYPT_HASH_MODE', CRYPT_HASH_MODE_INTERNAL);
+			define('Hash_MODE', Hash::CRYPT_HASH_MODE_INTERNAL);
 		}
 	}
 
 	public function setUp()
 	{
-		if (defined('CRYPT_HASH_MODE') && CRYPT_HASH_MODE !== CRYPT_HASH_MODE_INTERNAL)
+		if (defined('Hash_MODE') && Hash_MODE !== Hash::CRYPT_HASH_MODE_INTERNAL)
 		{
-			$this->markTestSkipped('Skipping test because CRYPT_HASH_MODE is not defined as CRYPT_HASH_MODE_INTERNAL.');
+			$this->markTestSkipped('Skipping test because Hash_MODE is not defined as Hash::Hash_MODE_INTERNAL.');
 		}
 	}
 
-	protected function assertHashesTo(Crypt_Hash $hash, $message, $expected)
+	protected function assertHashesTo(Hash $hash, $message, $expected)
 	{
 		$this->assertEquals(
 			strtolower($expected),
@@ -34,7 +34,7 @@ abstract class Crypt_Hash_TestCase extends PhpseclibTestCase
 		);
 	}
 
-	protected function assertHMACsTo(Crypt_Hash $hash, $key, $message, $expected)
+	protected function assertHMACsTo(Hash $hash, $key, $message, $expected)
 	{
 		$hash->setKey($key);
 
