@@ -74,6 +74,7 @@ namespace PhpSecLib\Math;
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
  * @link       http://pear.php.net/package/BigInteger
  */
+use PhpSecLib\Crypt\Random;
 
 /**
  * Pure-PHP arbitrary precision integer arithmetic library. Supports base-2, base-10, base-16, and base-256
@@ -88,7 +89,7 @@ class BigInteger {
     /**#@+
      * Reduction constants
      *
-     * @access private
+
      * @see Math_BigInteger::_reduce()
      */
     /**
@@ -120,7 +121,7 @@ class BigInteger {
      * Rather than create a thousands and thousands of new BigInteger objects in repeated function calls to add() and
      * multiply() or whatever, we'll just work directly on arrays, taking them in as parameters and returning them.
      *
-     * @access private
+
      */
     /**
      * $result[self::MATH_BIGINTEGER_VALUE] contains the value.
@@ -133,7 +134,7 @@ class BigInteger {
     /**#@-*/
 
     /**#@+
-     * @access private
+
      * @see Math_BigInteger::_montgomery()
      * @see Math_BigInteger::_barrett()
      */
@@ -152,7 +153,7 @@ class BigInteger {
     /**#@+
      * Mode constants.
      *
-     * @access private
+
      * @see Math_BigInteger::Math_BigInteger()
      */
     /**
@@ -178,7 +179,7 @@ class BigInteger {
      *
      * At what point do we switch between Karatsuba multiplication and schoolbook long multiplication?
      *
-     * @access private
+
      */
     const MATH_BIGINTEGER_KARATSUBA_CUTOFF =25;
 
@@ -186,41 +187,41 @@ class BigInteger {
      * Holds the BigInteger's value.
      *
      * @var Array
-     * @access private
+
      */
-    var $value;
+    private $value;
 
     /**
      * Holds the BigInteger's magnitude.
      *
      * @var Boolean
-     * @access private
+
      */
-    var $is_negative = false;
+    private $is_negative = false;
 
     /**
      * Random number generator function
      *
      * @see setRandomGenerator()
-     * @access private
+
      */
-    var $generator = 'mt_rand';
+    private $generator = 'mt_rand';
 
     /**
      * Precision
      *
      * @see setPrecision()
-     * @access private
+
      */
-    var $precision = -1;
+    private $precision = -1;
 
     /**
      * Precision Bitmask
      *
      * @see setPrecision()
-     * @access private
+
      */
-    var $bitmask = false;
+    private $bitmask = false;
 
     /**
      * Mode independent value used for serialization.
@@ -232,9 +233,9 @@ class BigInteger {
      * @see __sleep()
      * @see __wakeup()
      * @var String
-     * @access private
+
      */
-    var $hex;
+    private $hex;
 
     /**
      * Converts base-2, base-10, base-16, and binary strings (base-256) to BigIntegers.
@@ -853,9 +854,8 @@ class BigInteger {
      * @param Array $y_value
      * @param Boolean $y_negative
      * @return Array
-     * @access private
      */
-    function _add($x_value, $x_negative, $y_value, $y_negative)
+    private function _add($x_value, $x_negative, $y_value, $y_negative)
     {
         $x_size = count($x_value);
         $y_size = count($y_value);
@@ -984,9 +984,8 @@ class BigInteger {
      * @param Array $y_value
      * @param Boolean $y_negative
      * @return Array
-     * @access private
      */
-    function _subtract($x_value, $x_negative, $y_value, $y_negative)
+    private function _subtract($x_value, $x_negative, $y_value, $y_negative)
     {
         $x_size = count($x_value);
         $y_size = count($y_value);
@@ -1085,9 +1084,8 @@ class BigInteger {
      *
      * @param BigInteger $x
      * @return BigInteger
-     * @access public
      */
-    function multiply($x)
+    public function multiply($x)
     {
         switch ( MATH_BIGINTEGER_MODE ) {
             case self::MATH_BIGINTEGER_MODE_GMP:
@@ -1119,9 +1117,8 @@ class BigInteger {
      * @param Array $y_value
      * @param Boolean $y_negative
      * @return Array
-     * @access private
      */
-    function _multiply($x_value, $x_negative, $y_value, $y_negative)
+    private function _multiply($x_value, $x_negative, $y_value, $y_negative)
     {
         //if ( $x_value == $y_value ) {
         //    return array(
@@ -1156,9 +1153,8 @@ class BigInteger {
      * @param Array $x_value
      * @param Array $y_value
      * @return Array
-     * @access private
      */
-    function _regularMultiply($x_value, $y_value)
+    private function _regularMultiply($x_value, $y_value)
     {
         $x_length = count($x_value);
         $y_length = count($y_value);
@@ -1220,9 +1216,8 @@ class BigInteger {
      * @param Array $x_value
      * @param Array $y_value
      * @return Array
-     * @access private
      */
-    function _karatsuba($x_value, $y_value)
+    private function _karatsuba($x_value, $y_value)
     {
         $m = min(count($x_value) >> 1, count($y_value) >> 1);
 
@@ -1256,11 +1251,10 @@ class BigInteger {
     /**
      * Performs squaring
      *
-     * @param Array $x
+     * @param Array|bool $x
      * @return Array
-     * @access private
      */
-    function _square($x = false)
+    private function _square($x = false)
     {
         return count($x) < 2 * MATH_BIGINTEGER_KARATSUBA_CUTOFF ?
             $this->_trim($this->_baseSquare($x)) :
@@ -1276,9 +1270,8 @@ class BigInteger {
      *
      * @param Array $value
      * @return Array
-     * @access private
      */
-    function _baseSquare($value)
+    private function _baseSquare($value)
     {
         if ( empty($value) ) {
             return array();
@@ -1315,9 +1308,8 @@ class BigInteger {
      *
      * @param Array $value
      * @return Array
-     * @access private
      */
-    function _karatsubaSquare($value)
+    private function _karatsubaSquare($value)
     {
         $m = count($value) >> 1;
 
@@ -1370,11 +1362,10 @@ class BigInteger {
      * </code>
      *
      * @param BigInteger $y
-     * @return Array
-     * @access public
+     * @return BigInteger[]
      * @internal This function is based off of {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=9 HAC 14.20}.
      */
-    function divide($y)
+    public function divide($y)
     {
         switch ( MATH_BIGINTEGER_MODE ) {
             case self::MATH_BIGINTEGER_MODE_GMP:
@@ -2388,7 +2379,7 @@ class BigInteger {
      * </code>
      *
      * @param BigInteger $n
-     * @return mixed false, if no modular inverse exists, BigInteger, otherwise.
+     * @return mixed|false|BigInteger , if no modular inverse exists, BigInteger, otherwise.
      * @access public
      * @internal See {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=21 HAC 14.64} for more information.
      */
@@ -3033,8 +3024,8 @@ class BigInteger {
     /**
      * Generate a random number
      *
-     * @param optional Integer $min
-     * @param optional Integer $max
+     * @param Integer|BigInteger|bool $min
+     * @param Integer|BigInteger|bool $max
      * @return BigInteger
      * @access public
      */
@@ -3063,40 +3054,23 @@ class BigInteger {
         $max = ltrim($max->toBytes(), chr(0));
         $size = strlen($max) - 1;
 
-        $crypt_random = function_exists('Random::crypt_random_string') || (!class_exists('Crypt_Random') && function_exists('Random::crypt_random_string'));
-        if ($crypt_random) {
-            $random = Random::crypt_random_string($size);
-        } else {
-            $random = '';
-
-            if ($size & 1) {
-                $random.= chr(mt_rand(0, 255));
-            }
-
-            $blocks = $size >> 1;
-            for ($i = 0; $i < $blocks; ++$i) {
-                // mt_rand(-2147483648, 0x7FFFFFFF) always produces -2147483648 on some systems
-                $random.= pack('n', mt_rand(0, 0xFFFF));
-            }
-        }
+        $random = Random::crypt_random_string($size);
 
         $fragment = new BigInteger($random, 256);
         $leading = $fragment->compare(new BigInteger(substr($max, 1), 256)) > 0 ?
             ord($max[0]) - 1 : ord($max[0]);
 
-        if (!$crypt_random) {
-            $msb = chr(mt_rand(0, $leading));
-        } else {
-            $cutoff = floor(0xFF / $leading) * $leading;
-            while (true) {
-                $msb = ord(Random::crypt_random_string(1));
-                if ($msb <= $cutoff) {
-                    $msb%= $leading;
-                    break;
-                }
+        $cutoff = floor(0xFF / $leading) * $leading;
+
+        $msb = null;
+        while (true) {
+            $msb = ord(Random::crypt_random_string(1));
+            if ($msb <= $cutoff) {
+                $msb %= $leading;
+                break;
             }
-            $msb = chr($msb);
         }
+        $msb = chr($msb);
 
         $random = new BigInteger($msb . $random, 256);
 

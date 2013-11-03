@@ -52,7 +52,7 @@ namespace PhpSecLib\Crypt;
  * @author     Jim Wigginton <terrafrost@php.net>
  * @copyright  MMVII Jim Wigginton
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link       http://PhpSecLib.sourceforge.net
+ * @link       http://phpseclib.sourceforge.net
  */
 
 /**

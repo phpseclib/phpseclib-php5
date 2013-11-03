@@ -64,7 +64,7 @@ namespace PhpSecLib\Net;
  * @author     Jim Wigginton <terrafrost@php.net>
  * @copyright  MMVII Jim Wigginton
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link       http://PhpSecLib.sourceforge.net
+ * @link       http://phpseclib.sourceforge.net
  */
 
 /**#@+
@@ -1259,8 +1259,8 @@ class SSH1 {
         }
 
         $rsa = new RSA();
-        $rsa->loadKey($key, CRYPT_RSA_PUBLIC_FORMAT_RAW);
-        $rsa->setEncryptionMode(CRYPT_RSA_ENCRYPTION_PKCS1);
+        $rsa->loadKey($key, PUBLIC_FORMAT_RAW);
+        $rsa->setEncryptionMode(ENCRYPTION_PKCS1);
         return $rsa->encrypt($m);
         */
 

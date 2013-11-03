@@ -51,7 +51,7 @@ namespace PhpSecLib\Crypt;
  * @package    RC2
  * @author     Patrick Monnerat <pm@datasphere.ch>
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link       http://PhpSecLib.sourceforge.net
+ * @link       http://phpseclib.sourceforge.net
  */
 
 /**

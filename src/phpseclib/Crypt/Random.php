@@ -40,7 +40,7 @@ namespace PhpSecLib\Crypt;
  * @author     Jim Wigginton <terrafrost@php.net>
  * @copyright  MMVII Jim Wigginton
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link       http://PhpSecLib.sourceforge.net
+ * @link       http://phpseclib.sourceforge.net
  */
 
 /**
@@ -62,7 +62,7 @@ define('CRYPT_RANDOM_IS_WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
  * @access public
  */
 class Random {
-    function crypt_random_string($length)
+    public static function crypt_random_string($length)
     {
         if (CRYPT_RANDOM_IS_WINDOWS) {
             // method 1. prior to PHP 5.3 this would call rand() on windows hence the function_exists('class_alias') call.

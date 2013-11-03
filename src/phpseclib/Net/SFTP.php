@@ -53,7 +53,7 @@ namespace PhpSecLib\Net;
  * @author     Jim Wigginton <terrafrost@php.net>
  * @copyright  MMIX Jim Wigginton
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link       http://PhpSecLib.sourceforge.net
+ * @link       http://phpseclib.sourceforge.net
  */
 
 /**
@@ -2042,7 +2042,7 @@ class SFTP extends SSH2 {
             $packet_type = '-> ' . $this->packet_types[$type] . 
                            ' (' . round($stop - $start, 4) . 's)';
             if (NET_SFTP_LOGGING == NET_SFTP_LOG_REALTIME) {
-                echo "<pre>\r\n" . $this->_format_log(array($data), array($packet_type)) . "\r\n</pre>\r\n";
+                echo "<pre>\r\n" . $this->format_log(array($data), array($packet_type)) . "\r\n</pre>\r\n";
                 flush();
                 ob_flush();
             } else {
@@ -2118,7 +2118,7 @@ class SFTP extends SSH2 {
             $packet_type = '<- ' . $this->packet_types[$this->packet_type] . 
                            ' (' . round($stop - $start, 4) . 's)';
             if (NET_SFTP_LOGGING == NET_SFTP_LOG_REALTIME) {
-                echo "<pre>\r\n" . $this->_format_log(array($packet), array($packet_type)) . "\r\n</pre>\r\n";
+                echo "<pre>\r\n" . $this->format_log(array($packet), array($packet_type)) . "\r\n</pre>\r\n";
                 flush();
                 ob_flush();
             } else {
@@ -2148,7 +2148,7 @@ class SFTP extends SSH2 {
 
         switch (NET_SFTP_LOGGING) {
             case NET_SFTP_LOG_COMPLEX:
-                return $this->_format_log($this->packet_log, $this->packet_type_log);
+                return $this->format_log($this->packet_log, $this->packet_type_log);
                 break;
             //case NET_SFTP_LOG_SIMPLE:
             default:

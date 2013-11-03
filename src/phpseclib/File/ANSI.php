@@ -36,7 +36,7 @@ namespace PhpSecLib\File;
  * @author     Jim Wigginton <terrafrost@php.net>
  * @copyright  MMXII Jim Wigginton
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link       http://PhpSecLib.sourceforge.net
+ * @link       http://phpseclib.sourceforge.net
  */
 
 /**
@@ -52,169 +52,143 @@ class ANSI {
      * Max Width
      *
      * @var Integer
-     * @access private
      */
-    var $max_x;
+    private $max_x;
 
     /**
      * Max Height
      *
      * @var Integer
-     * @access private
      */
-    var $max_y;
+    private $max_y;
 
     /**
      * Max History
      *
      * @var Integer
-     * @access private
      */
-    var $max_history;
+    private $max_history;
 
     /**
      * History
      *
      * @var Array
-     * @access private
      */
-    var $history;
+    private $history;
 
     /**
      * History Attributes
      *
      * @var Array
-     * @access private
      */
-    var $history_attrs;
+    private $history_attributes;
 
     /**
      * Current Column
      *
      * @var Integer
-     * @access private
      */
-    var $x;
+    private $x;
 
     /**
      * Current Row
      *
      * @var Integer
-     * @access private
      */
-    var $y;
+    private $y;
 
     /**
      * Old Column
      *
      * @var Integer
-     * @access private
      */
-    var $old_x;
+    private $old_x;
 
     /**
      * Old Row
      *
      * @var Integer
-     * @access private
      */
-    var $old_y;
+    private $old_y;
 
     /**
      * An empty attribute row
      *
      * @var Array
-     * @access private
      */
-    var $attr_row;
+    private $attr_row;
 
     /**
      * The current screen text
      *
      * @var Array
-     * @access private
      */
-    var $screen;
+    private $screen;
 
     /**
      * The current screen attributes
      *
      * @var Array
-     * @access private
      */
-    var $attrs;
+    private $attrs;
 
     /**
      * The current foreground color
      *
      * @var String
-     * @access private
      */
-    var $foreground;
+    private $foreground;
 
     /**
      * The current background color
      *
      * @var String
-     * @access private
      */
-    var $background;
+    private $background;
 
     /**
      * Bold flag
      *
      * @var Boolean
-     * @access private
      */
-    var $bold;
+    private $bold;
 
     /**
      * Underline flag
      *
      * @var Boolean
-     * @access private
      */
-    var $underline;
+    private $underline;
 
     /**
      * Blink flag
      *
      * @var Boolean
-     * @access private
      */
-    var $blink;
+    private $blink;
 
     /**
      * Reverse flag
      *
      * @var Boolean
-     * @access private
      */
-    var $reverse;
+    private $reverse;
 
     /**
      * Color flag
      *
      * @var Boolean
-     * @access private
      */
-    var $color;
+    private $color;
 
     /**
      * Current ANSI code
      *
      * @var String
-     * @access private
      */
-    var $ansi;
+    private $ansi;
 
-    /**
-     * Default Constructor.
-     *
-     * @return ANSI
-     * @access public
-     */
-    function File_ANSI()
+    public function __construct()
     {
         $this->setHistory(200);
         $this->setDimensions(80, 24);
@@ -227,14 +201,13 @@ class ANSI {
      *
      * @param Integer $x
      * @param Integer $y
-     * @access public
      */
-    function setDimensions($x, $y)
+    public function setDimensions($x, $y)
     {
         $this->max_x = $x - 1;
         $this->max_y = $y - 1;
         $this->x = $this->y = 0;
-        $this->history = $this->history_attrs = array();
+        $this->history = $this->history_attributes = array();
         $this->attr_row = array_fill(0, $this->max_x + 1, '');
         $this->screen = array_fill(0, $this->max_y + 1, '');
         $this->attrs = array_fill(0, $this->max_y + 1, $this->attr_row);
@@ -252,11 +225,9 @@ class ANSI {
     /**
      * Set the number of lines that should be logged past the terminal height
      *
-     * @param Integer $x
-     * @param Integer $y
-     * @access public
+     * @param $history
      */
-    function setHistory($history)
+    public function setHistory($history)
     {
         $this->max_history = $history;
     }
@@ -265,9 +236,8 @@ class ANSI {
      * Load a string
      *
      * @param String $source
-     * @access public
      */
-    function loadString($source)
+    public function loadString($source)
     {
         $this->setDimensions($this->max_x + 1, $this->max_y + 1);
         $this->appendString($source);
@@ -308,12 +278,12 @@ class ANSI {
                         $this->history = array_merge($this->history, array_slice(array_splice($this->screen, $this->y + 1), 0, $this->old_y));
                         $this->screen = array_merge($this->screen, array_fill($this->y, $this->max_y, ''));
 
-                        $this->history_attrs = array_merge($this->history_attrs, array_slice(array_splice($this->attrs, $this->y + 1), 0, $this->old_y));
+                        $this->history_attributes = array_merge($this->history_attributes, array_slice(array_splice($this->attrs, $this->y + 1), 0, $this->old_y));
                         $this->attrs = array_merge($this->attrs, array_fill($this->y, $this->max_y, $this->attr_row));
 
                         if (count($this->history) == $this->max_history) {
                             array_shift($this->history);
-                            array_shift($this->history_attrs);
+                            array_shift($this->history_attributes);
                         }
                     case "\x1B[K": // Clear screen from cursor right
                         $this->screen[$this->y] = substr($this->screen[$this->y], 0, $this->x);
@@ -476,9 +446,8 @@ class ANSI {
      *
      * Also update the $this->screen and $this->history buffers
      *
-     * @access private
      */
-    function _newLine()
+    private function _newLine()
     {
         //if ($this->y < $this->max_y) {
         //    $this->y++;
@@ -488,12 +457,12 @@ class ANSI {
             $this->history = array_merge($this->history, array(array_shift($this->screen)));
             $this->screen[] = '';
 
-            $this->history_attrs = array_merge($this->history_attrs, array(array_shift($this->attrs)));
+            $this->history_attributes = array_merge($this->history_attributes, array(array_shift($this->attrs)));
             $this->attrs[] = $this->attr_row;
 
             if (count($this->history) >= $this->max_history) {
                 array_shift($this->history);
-                array_shift($this->history_attrs);
+                array_shift($this->history_attributes);
             }
 
             $this->y--;
@@ -504,10 +473,9 @@ class ANSI {
     /**
      * Returns the current screen without preformating
      *
-     * @access private
      * @return String
      */
-    function _getScreen()
+    private function _getScreen()
     {
         $output = '';
         for ($i = 0; $i <= $this->max_y; $i++) {
@@ -530,7 +498,7 @@ class ANSI {
      * @access public
      * @return String
      */
-    function getScreen()
+    public function getScreen()
     {
         return '<pre style="color: white; background: black" width="' . ($this->max_x + 1) . '">' . $this->_getScreen() . '</pre>';
     }
@@ -538,16 +506,15 @@ class ANSI {
     /**
      * Returns the current screen and the x previous lines
      *
-     * @access public
      * @return String
      */
-    function getHistory()
+    public function getHistory()
     {
         $scrollback = '';
         for ($i = 0; $i < count($this->history); $i++) {
             for ($j = 0; $j <= $this->max_x + 1; $j++) {
-                if (isset($this->history_attrs[$i][$j])) {
-                    $scrollback.= $this->history_attrs[$i][$j];
+                if (isset($this->history_attributes[$i][$j])) {
+                    $scrollback.= $this->history_attributes[$i][$j];
                 }
                 if (isset($this->history[$i][$j])) {
                     $scrollback.= htmlspecialchars($this->history[$i][$j]);

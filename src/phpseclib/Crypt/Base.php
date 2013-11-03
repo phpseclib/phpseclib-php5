@@ -53,7 +53,7 @@ namespace PhpSecLib\Crypt;
  * @copyright  MMVII Jim Wigginton
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
  * @version    1.0.1
- * @link       http://PhpSecLib.sourceforge.net
+ * @link       http://phpseclib.sourceforge.net
  */
 
 use Exception;
@@ -295,7 +295,7 @@ abstract class Base {
      * In order to do the CFB-mode work (fast) PhpSecLib
      * use a separate ECB-mode mcrypt resource.
      *
-     * @link http://PhpSecLib.sourceforge.net/cfb-demo.phps
+     * @link http://phpseclib.sourceforge.net/cfb-demo.phps
      * @see Crypt_Base::encrypt()
      * @see Crypt_Base::decrypt()
      * @see Crypt_Base::_setupMcrypt()
@@ -674,7 +674,7 @@ abstract class Base {
                 $this->enchanged = false;
             }
 
-            // re: {@link http://PhpSecLib.sourceforge.net/cfb-demo.phps}
+            // re: {@link http://phpseclib.sourceforge.net/cfb-demo.phps}
             // using mcrypt's default handing of CFB the above would output two different things.  using PhpSecLib's
             // rewritten CFB implementation the above outputs the same thing twice.
             if ($this->mode == self::CRYPT_MODE_CFB && $this->continuousBuffer) {
@@ -1315,7 +1315,7 @@ abstract class Base {
 
             // we need the $ecb mcrypt resource (only) in MODE_CFB with enableContinuousBuffer()
             // to workaround mcrypt's broken ncfb implementation in buffered mode
-            // see: {@link http://PhpSecLib.sourceforge.net/cfb-demo.phps}
+            // see: {@link http://phpseclib.sourceforge.net/cfb-demo.phps}
             if ($this->mode == self::CRYPT_MODE_CFB) {
                 $this->ecb = mcrypt_module_open($this->cipher_name_mcrypt, '', MCRYPT_MODE_ECB, '');
             }

@@ -46,13 +46,15 @@ namespace PhpSecLib\Net;
  * @author     Jim Wigginton <terrafrost@php.net>
  * @copyright  MMX Jim Wigginton
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link       http://PhpSecLib.sourceforge.net
+ * @link       http://phpseclib.sourceforge.net
  */
 
 /**
  * Pure-PHP implementations of SCP.
  *
  * @author  Jim Wigginton <terrafrost@php.net>
+ *
+ * @TODO: maybe use extend clause instead of access some private methods from SSH
  */
 class SCP {
     /**
@@ -109,6 +111,8 @@ class SCP {
      *
      * @param $ssh
      * @return SCP
+     *
+     * @throws \InvalidArgumentException
      */
     public function __construct($ssh)
     {
@@ -116,17 +120,15 @@ class SCP {
             return;
         }
 
-        switch (strtolower(get_class($ssh))) {
-            case'net_ssh2': //TODO: use instanceof here
-                $this->mode = self::NET_SCP_SSH2;
-                break;
-            case 'net_ssh1':
+        if($ssh instanceof SSH2) {
+            $this->mode = self::NET_SCP_SSH2;
+        } elseif($ssh instanceof SSH1) {
                 $this->packet_size = 50000;
                 $this->mode = self::NET_SCP_SSH1;
-                break;
-            default:
-                return;
+        } else {
+            throw new \InvalidArgumentException('You have to provide a SSH connection');
         }
+
 
         $this->ssh = $ssh;
     }
@@ -165,7 +167,7 @@ class SCP {
         }
 
         if ($this->mode == self::NET_SCP_SSH2) {
-            $this->packet_size = $this->ssh->packet_size_client_to_server[SSH2::NET_SSH2_CHANNEL_EXEC];
+            $this->packet_size = $this->ssh->getPacketSizeClientToServer()[SSH2::SSH2_CHANNEL_EXEC];
         }
 
         $remote_file = basename($remote_file);

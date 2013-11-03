@@ -1,5 +1,5 @@
 {
-    "name": "PhpSecLib/PhpSecLib",
+    "name": "phpseclib/phpseclib",
     "type": "library",
     "description": "PHP Secure Communications Library - Pure-PHP implementations of RSA, AES, SSH2, SFTP, X.509 etc.",
     "keywords": [
@@ -19,7 +19,7 @@
         "asn.1",
         "BigInteger"
         ],
-    "homepage": "http://PhpSecLib.sourceforge.net",
+    "homepage": "http://phpseclib.sourceforge.net",
     "license": "MIT",
     "authors": [
         {
@@ -40,10 +40,7 @@
     "autoload": {
         "psr-0": {
             "PhpSecLib": "src/"
-        },
-        "files": [
-            "src/PhpSecLib/Crypt/Random.php"
-        ]
+        }
     },
     "extra": {
         "branch-alias": {
