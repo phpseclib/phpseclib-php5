@@ -62,21 +62,9 @@ namespace PhpSecLib\Crypt;
  */
 
 /**
- * Include Base
- *
- * Base cipher class
- */
-if (!class_exists('Base')) {
-    require_once('Base.php');
-}
-
-/**
  * Pure-PHP implementation of DES.
  *
  * @author  Jim Wigginton <terrafrost@php.net>
- * @version 0.1.0
- * @access  public
- * @package DES
  */
 class DES extends Base {
     /**#@+

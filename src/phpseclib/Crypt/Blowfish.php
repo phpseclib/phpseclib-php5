@@ -59,22 +59,10 @@ namespace PhpSecLib\Crypt;
  */
 
 /**
- * Include Base
- *
- * Base cipher class
- */
-if (!class_exists('Base')) {
-    require_once('Base.php');
-}
-
-/**
  * Pure-PHP implementation of Blowfish.
  *
  * @author  Jim Wigginton <terrafrost@php.net>
  * @author  Hans-Juergen Petrich <petrich@tronic-media.com>
- * @version 1.0
- * @access  public
- * @package Blowfish
  */
 class Blowfish extends Base {
     /**#@+
