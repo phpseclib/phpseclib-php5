@@ -1,14 +1,14 @@
 <?php
 /**
- * Bootstrapping File for phpseclib Test Suite
+ * Bootstrapping File for PhpSecLib Test Suite
  *
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 
 // Set up include path accordingly. This is especially required because some
-// class files of phpseclib require() other dependencies.
+// class files of PhpSecLib require() other dependencies.
 set_include_path(implode(PATH_SEPARATOR, array(
-	dirname(__FILE__) . '/../phpseclib/',
+	dirname(__FILE__) . '/../PhpSecLib/',
 	dirname(__FILE__) . '/',
 	get_include_path(),
 )));
@@ -40,3 +40,6 @@ function phpseclib_autoload($class)
 }
 
 spl_autoload_register('phpseclib_autoload');
+
+
+require __DIR__ . '/../vendor/autoload.php';

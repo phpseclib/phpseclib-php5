@@ -1,6 +1,8 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
+namespace PhpSecLib\Crypt;
+
 /**
  * Pure-PHP implementation of RC2.
  *
@@ -17,7 +19,7 @@
  * <?php
  *    include('Crypt/RC2.php');
  *
- *    $rc2 = new Crypt_RC2();
+ *    $rc2 = new RC2();
  *
  *    $rc2->setKey('abcdefgh');
  *
@@ -46,20 +48,12 @@
  * THE SOFTWARE.
  *
  * @category   Crypt
- * @package    Crypt_RC2
+ * @package    RC2
  * @author     Patrick Monnerat <pm@datasphere.ch>
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
  * @link       http://phpseclib.sourceforge.net
  */
 
-/**
- * Include Crypt_Base
- *
- * Base cipher class
- */
-if (!class_exists('Crypt_Base')) {
-    require_once('Base.php');
-}
 
 /**#@+
  * @access public
@@ -119,9 +113,9 @@ define('CRYPT_RC2_MODE_MCRYPT', CRYPT_MODE_MCRYPT);
  *
  * @version 0.1.1
  * @access  public
- * @package Crypt_RC2
+ * @package RC2
  */
-class Crypt_RC2 extends Crypt_Base {
+class RC2 extends Base {
     /**
      * Block Length of the cipher
      *
@@ -350,7 +344,7 @@ class Crypt_RC2 extends Crypt_Base {
      *
      * Valid key lengths are 1 to 1024.
      * Calling this function after setting the key has no effect until the next
-     *  Crypt_RC2::setKey() call.
+     *  RC2::setKey() call.
      *
      * @access public
      * @param Integer $length in bits
@@ -515,7 +509,7 @@ class Crypt_RC2 extends Crypt_Base {
      */
     function _setupKey()
     {
-        // Key has already been expanded in Crypt_RC2::setKey():
+        // Key has already been expanded in RC2::setKey():
         // Only the first value must be altered.
         $l = unpack('Ca/Cb/v*', $this->key);
         array_unshift($l, $this->pitable[$l['a']] | ($l['b'] << 8));
@@ -532,7 +526,7 @@ class Crypt_RC2 extends Crypt_Base {
      */
     function _setupInlineCrypt()
     {
-        $lambda_functions = &Crypt_RC2::_getLambdaFunctions();
+        $lambda_functions = &RC2::_getLambdaFunctions();
 
         // The first 10 generated $lambda_functions will use the $keys hardcoded as integers
         // for the mixing rounds, for better inline crypt performance [~20% faster].
@@ -544,7 +538,7 @@ class Crypt_RC2 extends Crypt_Base {
             }
         }
 
-        $code_hash = md5(str_pad("Crypt_RC2, {$this->mode}, ", 32, "\0") . implode(',', $keys));
+        $code_hash = md5(str_pad("RC2, {$this->mode}, ", 32, "\0") . implode(',', $keys));
 
         // Is there a re-usable $lambda_functions in there?
         // If not, we have to create it.

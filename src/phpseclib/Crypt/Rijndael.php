@@ -1,6 +1,8 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
+namespace PhpSecLib\Crypt;
+
 /**
  * Pure-PHP implementation of Rijndael.
  *
@@ -8,11 +10,11 @@
  *
  * PHP versions 4 and 5
  *
- * If {@link Crypt_Rijndael::setBlockLength() setBlockLength()} isn't called, it'll be assumed to be 128 bits.  If
- * {@link Crypt_Rijndael::setKeyLength() setKeyLength()} isn't called, it'll be calculated from
- * {@link Crypt_Rijndael::setKey() setKey()}.  ie. if the key is 128-bits, the key length will be 128-bits.  If it's
+ * If {@link Rijndael::setBlockLength() setBlockLength()} isn't called, it'll be assumed to be 128 bits.  If
+ * {@link Rijndael::setKeyLength() setKeyLength()} isn't called, it'll be calculated from
+ * {@link Rijndael::setKey() setKey()}.  ie. if the key is 128-bits, the key length will be 128-bits.  If it's
  * 136-bits it'll be null-padded to 192-bits and 192 bits will be the key length until
- * {@link Crypt_Rijndael::setKey() setKey()} is called, again, at which point, it'll be recalculated.
+ * {@link Rijndael::setKey() setKey()} is called, again, at which point, it'll be recalculated.
  *
  * Not all Rijndael implementations may support 160-bits or 224-bits as the block length / key length.  mcrypt, for example,
  * does not.  AES, itself, only supports block lengths of 128 and key lengths of 128, 192, and 256.
@@ -31,7 +33,7 @@
  * <?php
  *    include('Crypt/Rijndael.php');
  *
- *    $rijndael = new Crypt_Rijndael();
+ *    $rijndael = new Rijndael();
  *
  *    $rijndael->setKey('abcdefghijklmnop');
  *
@@ -64,7 +66,7 @@
  * THE SOFTWARE.
  *
  * @category   Crypt
- * @package    Crypt_Rijndael
+ * @package    Rijndael
  * @author     Jim Wigginton <terrafrost@php.net>
  * @copyright  MMVIII Jim Wigginton
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -72,76 +74,67 @@
  */
 
 /**
- * Include Crypt_Base
- *
- * Base cipher class
- */
-if (!class_exists('Crypt_Base')) {
-    require_once('Base.php');
-}
-
-/**#@+
- * @access public
- * @see Crypt_Rijndael::encrypt()
- * @see Crypt_Rijndael::decrypt()
- */
-/**
- * Encrypt / decrypt using the Counter mode.
- *
- * Set to -1 since that's what Crypt/Random.php uses to index the CTR mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
- */
-define('CRYPT_RIJNDAEL_MODE_CTR', CRYPT_MODE_CTR);
-/**
- * Encrypt / decrypt using the Electronic Code Book mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
- */
-define('CRYPT_RIJNDAEL_MODE_ECB', CRYPT_MODE_ECB);
-/**
- * Encrypt / decrypt using the Code Book Chaining mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
- */
-define('CRYPT_RIJNDAEL_MODE_CBC', CRYPT_MODE_CBC);
-/**
- * Encrypt / decrypt using the Cipher Feedback mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
- */
-define('CRYPT_RIJNDAEL_MODE_CFB', CRYPT_MODE_CFB);
-/**
- * Encrypt / decrypt using the Cipher Feedback mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
- */
-define('CRYPT_RIJNDAEL_MODE_OFB', CRYPT_MODE_OFB);
-/**#@-*/
-
-/**#@+
- * @access private
- * @see Crypt_Rijndael::Crypt_Rijndael()
- */
-/**
- * Toggles the internal implementation
- */
-define('CRYPT_RIJNDAEL_MODE_INTERNAL', CRYPT_MODE_INTERNAL);
-/**
- * Toggles the mcrypt implementation
- */
-define('CRYPT_RIJNDAEL_MODE_MCRYPT', CRYPT_MODE_MCRYPT);
-/**#@-*/
-
-/**
  * Pure-PHP implementation of Rijndael.
  *
  * @author  Jim Wigginton <terrafrost@php.net>
  * @version 0.1.0
  * @access  public
- * @package Crypt_Rijndael
+ * @package Rijndael
  */
-class Crypt_Rijndael extends Crypt_Base {
+class Rijndael extends Base {
+    /**#@+
+     * @access public
+     * @see Crypt_Rijndael::encrypt()
+     * @see Crypt_Rijndael::decrypt()
+     */
+    /**
+     * Encrypt / decrypt using the Counter mode.
+     *
+     * Set to -1 since that's what Crypt/Random.php uses to index the CTR mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
+     */
+    const CRYPT_RIJNDAEL_MODE_CTR = self::CRYPT_MODE_CTR;
+    /**
+     * Encrypt / decrypt using the Electronic Code Book mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
+     */
+    const CRYPT_RIJNDAEL_MODE_ECB = self::CRYPT_MODE_ECB;
+    /**
+     * Encrypt / decrypt using the Code Book Chaining mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
+     */
+    const CRYPT_RIJNDAEL_MODE_CBC = self::CRYPT_MODE_CBC;
+    /**
+     * Encrypt / decrypt using the Cipher Feedback mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
+     */
+    const CRYPT_RIJNDAEL_MODE_CFB = self::CRYPT_MODE_CFB;
+    /**
+     * Encrypt / decrypt using the Cipher Feedback mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
+     */
+    const CRYPT_RIJNDAEL_MODE_OFB = self::CRYPT_MODE_OFB;
+    /**#@-*/
+
+    /**#@+
+     * @access private
+     * @see Crypt_Rijndael::Crypt_Rijndael()
+     */
+    /**
+     * Toggles the internal implementation
+     */
+    const CRYPT_RIJNDAEL_MODE_INTERNAL = self::CRYPT_MODE_INTERNAL;
+    /**
+     * Toggles the mcrypt implementation
+     */
+    const CRYPT_RIJNDAEL_MODE_MCRYPT = self::CRYPT_MODE_MCRYPT;
+    /**#@-*/
+
     /**
      * The default password key_size used by setPassword()
      *
@@ -165,7 +158,7 @@ class Crypt_Rijndael extends Crypt_Base {
      * The mcrypt specific name of the cipher
      *
      * Mcrypt is useable for 128/192/256-bit $block_size/$key_size. For 160/224 not.
-     * Crypt_Rijndael determines automatically whether mcrypt is useable
+     * Rijndael determines automatically whether mcrypt is useable
      * or not for the current $block_size/$key_size.
      * In case of, $cipher_name_mcrypt will be set dynamicaly at run time accordingly.
      *
@@ -185,7 +178,7 @@ class Crypt_Rijndael extends Crypt_Base {
      * @var String
      * @access private
      */
-    var $password_default_salt = 'phpseclib';
+    var $password_default_salt = 'PhpSecLib';
 
     /**
      * Has the key length explicitly been set or should it be derived from the key, itself?
@@ -699,9 +692,9 @@ class Crypt_Rijndael extends Crypt_Base {
      * @param optional Integer $mode
      * @access public
      */
-    function Crypt_Rijndael($mode = CRYPT_RIJNDAEL_MODE_CBC)
+    function __construct($mode = self::CRYPT_RIJNDAEL_MODE_CBC)
     {
-        parent::Crypt_Base($mode);
+        parent::__construct($mode);
     }
 
     /**
@@ -747,14 +740,14 @@ class Crypt_Rijndael extends Crypt_Base {
      * Valid key lengths are 128, 160, 192, 224, and 256.  If the length is less than 128, it will be rounded up to
      * 128.  If the length is greater than 128 and invalid, it will be rounded down to the closest valid amount.
      *
-     * Note: phpseclib extends Rijndael (and AES) for using 160- and 224-bit keys but they are officially not defined
+     * Note: PhpSecLib extends Rijndael (and AES) for using 160- and 224-bit keys but they are officially not defined
      *       and the most (if not all) implementations are not able using 160/224-bit keys but round/pad them up to
      *       192/256 bits as, for example, mcrypt will do.
      *
      *       That said, if you want be compatible with other Rijndael and AES implementations,
      *       you should not setKeyLength(160) or setKeyLength(224).
      *
-     * Additional: In case of 160- and 224-bit keys, phpseclib will/can, for that reason, not use
+     * Additional: In case of 160- and 224-bit keys, PhpSecLib will/can, for that reason, not use
      *             the mcrypt php extention, even if available.
      *             This results then in slower encryption.
      *
@@ -823,7 +816,7 @@ class Crypt_Rijndael extends Crypt_Base {
      */
     function _setupEngine()
     {
-        if (constant('CRYPT_' . $this->const_namespace . '_MODE') == CRYPT_MODE_INTERNAL) {
+        if (constant('CRYPT_' . $this->const_namespace . '_MODE') == self::CRYPT_MODE_INTERNAL) {
             // No mcrypt support at all for rijndael
             return;
         }
@@ -835,10 +828,10 @@ class Crypt_Rijndael extends Crypt_Base {
         switch (true) {
             case $this->key_size % 8: // mcrypt is not usable for 160/224-bit keys, only for 128/192/256-bit keys
             case !in_array($cipher_name_mcrypt, mcrypt_list_algorithms()): // $cipher_name_mcrypt is not available for the current $block_size
-                $engine = CRYPT_MODE_INTERNAL;
+                $engine = self::CRYPT_MODE_INTERNAL;
                 break;
             default:
-                $engine = CRYPT_MODE_MCRYPT;
+                $engine = self::CRYPT_MODE_MCRYPT;
         }
 
         if ($this->engine == $engine && $this->cipher_name_mcrypt == $cipher_name_mcrypt) {
@@ -1214,7 +1207,7 @@ class Crypt_Rijndael extends Crypt_Base {
         // So here we are'nt under the same heavy timing-stress as we are in _de/encryptBlock() or de/encrypt().
         // However...the here generated function- $code, stored as php callback in $this->inline_crypt, must work as fast as even possible.
 
-        $lambda_functions =& Crypt_Rijndael::_getLambdaFunctions();
+        $lambda_functions =& Rijndael::_getLambdaFunctions();
 
         // The first 10 generated $lambda_functions will use the key-words hardcoded for better performance.
         // For memory reason we limit those ultra-optimized functions.
@@ -1233,7 +1226,7 @@ class Crypt_Rijndael extends Crypt_Base {
             $init_decrypt = '$dw = $self->dw;';
         }
 
-        $code_hash = md5(str_pad("Crypt_Rijndael, {$this->mode}, {$this->block_size}, ", 32, "\0") . implode(',', $w));
+        $code_hash = md5(str_pad("Rijndael, {$this->mode}, {$this->block_size}, ", 32, "\0") . implode(',', $w));
 
         if (!isset($lambda_functions[$code_hash])) {
             $Nr = $this->Nr;

@@ -34,19 +34,13 @@
     "suggest": {
         "ext-mcrypt": "Install the Mcrypt extension in order to speed up a wide variety of cryptographic operations.",
         "ext-gmp": "Install the GMP (GNU Multiple Precision) extension in order to speed up arbitrary precision integer arithmetic operations.",
-        "pear-pear/PHP_Compat": "Install PHP_Compat to get phpseclib working on PHP >= 4.3.3." 
+        "pear-pear/PHP_Compat": "Install PHP_Compat to get PhpSecLib working on PHP >= 4.3.3."
     },
-    "include-path": ["phpseclib/"],
+    "include-path": ["PhpSecLib/"],
     "autoload": {
         "psr-0": {
-            "Crypt": "phpseclib/",
-            "File": "phpseclib/",
-            "Math": "phpseclib/",
-            "Net": "phpseclib/"
-        },
-        "files": [
-            "phpseclib/Crypt/Random.php"
-        ]
+            "PhpSecLib": "src/"
+        }
     },
     "extra": {
         "branch-alias": {

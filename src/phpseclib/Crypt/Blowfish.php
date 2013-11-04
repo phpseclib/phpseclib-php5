@@ -1,6 +1,9 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
+namespace PhpSecLib\Crypt;
+
+
 /**
  * Pure-PHP implementation of Blowfish.
  *
@@ -17,7 +20,7 @@
  * <?php
  *    include('Crypt/Blowfish.php');
  *
- *    $blowfish = new Crypt_Blowfish();
+ *    $blowfish = new Blowfish();
  *
  *    $blowfish->setKey('12345678901234567890123456789012');
  *
@@ -46,7 +49,7 @@
  * THE SOFTWARE.
  *
  * @category   Crypt
- * @package    Crypt_Blowfish
+ * @package    Blowfish
  * @author     Jim Wigginton <terrafrost@php.net>
  * @author     Hans-Juergen Petrich <petrich@tronic-media.com>
  * @copyright  MMVII Jim Wigginton
@@ -56,77 +59,65 @@
  */
 
 /**
- * Include Crypt_Base
- *
- * Base cipher class
- */
-if (!class_exists('Crypt_Base')) {
-    require_once('Base.php');
-}
-
-/**#@+
- * @access public
- * @see Crypt_Blowfish::encrypt()
- * @see Crypt_Blowfish::decrypt()
- */
-/**
- * Encrypt / decrypt using the Counter mode.
- *
- * Set to -1 since that's what Crypt/Random.php uses to index the CTR mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
- */
-define('CRYPT_BLOWFISH_MODE_CTR', CRYPT_MODE_CTR);
-/**
- * Encrypt / decrypt using the Electronic Code Book mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
- */
-define('CRYPT_BLOWFISH_MODE_ECB', CRYPT_MODE_ECB);
-/**
- * Encrypt / decrypt using the Code Book Chaining mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
- */
-define('CRYPT_BLOWFISH_MODE_CBC', CRYPT_MODE_CBC);
-/**
- * Encrypt / decrypt using the Cipher Feedback mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
- */
-define('CRYPT_BLOWFISH_MODE_CFB', CRYPT_MODE_CFB);
-/**
- * Encrypt / decrypt using the Cipher Feedback mode.
- *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
- */
-define('CRYPT_BLOWFISH_MODE_OFB', CRYPT_MODE_OFB);
-/**#@-*/
-
-/**#@+
- * @access private
- * @see Crypt_Blowfish::Crypt_Blowfish()
- */
-/**
- * Toggles the internal implementation
- */
-define('CRYPT_BLOWFISH_MODE_INTERNAL', CRYPT_MODE_INTERNAL);
-/**
- * Toggles the mcrypt implementation
- */
-define('CRYPT_BLOWFISH_MODE_MCRYPT', CRYPT_MODE_MCRYPT);
-/**#@-*/
-
-/**
  * Pure-PHP implementation of Blowfish.
  *
  * @author  Jim Wigginton <terrafrost@php.net>
  * @author  Hans-Juergen Petrich <petrich@tronic-media.com>
- * @version 1.0
- * @access  public
- * @package Crypt_Blowfish
  */
-class Crypt_Blowfish extends Crypt_Base {
+class Blowfish extends Base {
+    /**#@+
+     * @access public
+     * @see Crypt_Blowfish::encrypt()
+     * @see Crypt_Blowfish::decrypt()
+     */
+    /**
+     * Encrypt / decrypt using the Counter mode.
+     *
+     * Set to -1 since that's what Crypt/Random.php uses to index the CTR mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
+     */
+    const CRYPT_BLOWFISH_MODE_CTR = self::CRYPT_MODE_CTR;
+    /**
+     * Encrypt / decrypt using the Electronic Code Book mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
+     */
+    const CRYPT_BLOWFISH_MODE_ECB = self::CRYPT_MODE_ECB;
+    /**
+     * Encrypt / decrypt using the Code Book Chaining mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
+     */
+    const CRYPT_BLOWFISH_MODE_CBC = self::CRYPT_MODE_CBC;
+    /**
+     * Encrypt / decrypt using the Cipher Feedback mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
+     */
+    const CRYPT_BLOWFISH_MODE_CFB = self::CRYPT_MODE_CFB;
+    /**
+     * Encrypt / decrypt using the Cipher Feedback mode.
+     *
+     * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
+     */
+    const CRYPT_BLOWFISH_MODE_OFB = self::CRYPT_MODE_OFB;
+    /**#@-*/
+
+    /**#@+
+     * @access private
+     * @see Crypt_Blowfish::Crypt_Blowfish()
+     */
+    /**
+     * Toggles the internal implementation
+     */
+    const CRYPT_BLOWFISH_MODE_INTERNAL = self::CRYPT_MODE_INTERNAL;
+    /**
+     * Toggles the mcrypt implementation
+     */
+    const CRYPT_BLOWFISH_MODE_MCRYPT = self::CRYPT_MODE_MCRYPT;
+    /**#@-*/
+
     /**
      * Block Length of the cipher
      *
@@ -392,7 +383,7 @@ class Crypt_Blowfish extends Crypt_Base {
      * @param optional Integer $mode
      * @access public
      */
-    function Crypt_Blowfish($mode = CRYPT_BLOWFISH_MODE_CBC)
+    function __construct($mode = CRYPT_BLOWFISH_MODE_CBC)
     {
         parent::Crypt_Base($mode);
     }
@@ -562,7 +553,7 @@ class Crypt_Blowfish extends Crypt_Base {
      */
     function _setupInlineCrypt()
     {
-        $lambda_functions =& Crypt_Blowfish::_getLambdaFunctions();
+        $lambda_functions =& Blowfish::_getLambdaFunctions();
 
         // We create max. 10 hi-optimized code for memory reason. Means: For each $key one ultra fast inline-crypt function.
         // After that, we'll still create very fast optimized code but not the hi-ultimative code, for each $mode one.
@@ -570,10 +561,10 @@ class Crypt_Blowfish extends Crypt_Base {
 
         switch (true) {
             case $gen_hi_opt_code:
-                $code_hash = md5(str_pad("Crypt_Blowfish, {$this->mode}, ", 32, "\0") . $this->key);
+                $code_hash = md5(str_pad("Blowfish, {$this->mode}, ", 32, "\0") . $this->key);
                 break;
             default:
-                $code_hash = "Crypt_Blowfish, {$this->mode}";
+                $code_hash = "Blowfish, {$this->mode}";
         }
 
         if (!isset($lambda_functions[$code_hash])) {

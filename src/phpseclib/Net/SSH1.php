@@ -1,6 +1,8 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
+namespace PhpSecLib\Net;
+
 /**
  * Pure-PHP implementation of SSHv1.
  *
@@ -11,7 +13,7 @@
  * <?php
  *    include('Net/SSH1.php');
  *
- *    $ssh = new Net_SSH1('www.domain.tld');
+ *    $ssh = new SSH1('www.domain.tld');
  *    if (!$ssh->login('username', 'password')) {
  *        exit('Login Failed');
  *    }
@@ -25,7 +27,7 @@
  * <?php
  *    include('Net/SSH1.php');
  *
- *    $ssh = new Net_SSH1('www.domain.tld');
+ *    $ssh = new SSH1('www.domain.tld');
  *    if (!$ssh->login('username', 'password')) {
  *        exit('Login Failed');
  *    }
@@ -58,7 +60,7 @@
  * THE SOFTWARE.
  *
  * @category   Net
- * @package    Net_SSH1
+ * @package    SSH1
  * @author     Jim Wigginton <terrafrost@php.net>
  * @copyright  MMVII Jim Wigginton
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -229,16 +231,16 @@ define('NET_SSH1_READ_REGEX', 2);
  * @author  Jim Wigginton <terrafrost@php.net>
  * @version 0.1.0
  * @access  public
- * @package Net_SSH1
+ * @package SSH1
  */
-class Net_SSH1 {
+class SSH1 {
     /**
      * The SSH identifier
      *
      * @var String
      * @access private
      */
-    var $identifier = 'SSH-1.5-phpseclib';
+    var $identifier = 'SSH-1.5-PhpSecLib';
 
     /**
      * The Socket Object
@@ -443,24 +445,11 @@ class Net_SSH1 {
      * @param optional Integer $port
      * @param optional Integer $timeout
      * @param optional Integer $cipher
-     * @return Net_SSH1
+     * @return SSH1
      * @access public
      */
     function Net_SSH1($host, $port = 22, $timeout = 10, $cipher = NET_SSH1_CIPHER_3DES)
     {
-        if (!class_exists('Math_BigInteger')) {
-            require_once('Math/BigInteger.php');
-        }
-
-        // Include Crypt_Random
-        // the class_exists() will only be called if the crypt_random_string function hasn't been defined and
-        // will trigger a call to __autoload() if you're wanting to auto-load classes
-        // call function_exists() a second time to stop the require_once from being called outside
-        // of the auto loader
-        if (!function_exists('crypt_random_string') && !class_exists('Crypt_Random') && !function_exists('crypt_random_string')) {
-            require_once('Crypt/Random.php');
-        }
-
         $this->protocol_flags = array(
             1  => 'NET_SSH1_MSG_DISCONNECT',
             2  => 'NET_SSH1_SMSG_PUBLIC_KEY',
@@ -554,7 +543,7 @@ class Net_SSH1 {
 
         $session_id = pack('H*', md5($host_key_public_modulus->toBytes() . $server_key_public_modulus->toBytes() . $anti_spoofing_cookie));
 
-        $session_key = crypt_random_string(32);
+        $session_key = Random::crypt_random_string(32);
         $double_encrypted_session_key = $session_key ^ str_pad($session_id, 32, chr(0));
 
         if ($server_key_public_modulus->compare($host_key_public_modulus) < 0) {
@@ -602,28 +591,19 @@ class Net_SSH1 {
             //    $this->crypto = new Crypt_Null();
             //    break;
             case NET_SSH1_CIPHER_DES:
-                if (!class_exists('Crypt_DES')) {
-                    require_once('Crypt/DES.php');
-                }
                 $this->crypto = new Crypt_DES();
                 $this->crypto->disablePadding();
                 $this->crypto->enableContinuousBuffer();
                 $this->crypto->setKey(substr($session_key, 0,  8));
                 break;
             case NET_SSH1_CIPHER_3DES:
-                if (!class_exists('Crypt_TripleDES')) {
-                    require_once('Crypt/TripleDES.php');
-                }
                 $this->crypto = new Crypt_TripleDES(CRYPT_DES_MODE_3CBC);
                 $this->crypto->disablePadding();
                 $this->crypto->enableContinuousBuffer();
                 $this->crypto->setKey(substr($session_key, 0, 24));
                 break;
             //case NET_SSH1_CIPHER_RC4:
-            //    if (!class_exists('Crypt_RC4')) {
-            //        require_once('Crypt/RC4.php');
-            //    }
-            //    $this->crypto = new Crypt_RC4();
+            //    $this->crypto = new RC4();
             //    $this->crypto->enableContinuousBuffer();
             //    $this->crypto->setKey(substr($session_key, 0,  16));
             //    break;
@@ -725,7 +705,7 @@ class Net_SSH1 {
      * {@link http://www.faqs.org/docs/bashman/bashref_65.html http://www.faqs.org/docs/bashman/bashref_65.html}
      * {@link http://www.faqs.org/docs/bashman/bashref_62.html http://www.faqs.org/docs/bashman/bashref_62.html}
      *
-     * To execute further commands, a new Net_SSH1 object will need to be created.
+     * To execute further commands, a new SSH1 object will need to be created.
      *
      * Returns false on failure and the output, otherwise.
      *
@@ -770,7 +750,7 @@ class Net_SSH1 {
 
         fclose($this->fsock);
 
-        // reset the execution bitmap - a new Net_SSH1 object needs to be created.
+        // reset the execution bitmap - a new SSH1 object needs to be created.
         $this->bitmap = 0;
 
         return $output;
@@ -1093,7 +1073,7 @@ class Net_SSH1 {
 
         $length = strlen($data) + 4;
 
-        $padding = crypt_random_string(8 - ($length & 7));
+        $padding = Random::crypt_random_string(8 - ($length & 7));
 
         $orig = $data;
         $data = $padding . $data;
@@ -1252,13 +1232,9 @@ class Net_SSH1 {
     function _rsa_crypt($m, $key)
     {
         /*
-        if (!class_exists('Crypt_RSA')) {
-            require_once('Crypt/RSA.php');
-        }
-
-        $rsa = new Crypt_RSA();
-        $rsa->loadKey($key, CRYPT_RSA_PUBLIC_FORMAT_RAW);
-        $rsa->setEncryptionMode(CRYPT_RSA_ENCRYPTION_PKCS1);
+        $rsa = new RSA();
+        $rsa->loadKey($key, PUBLIC_FORMAT_RAW);
+        $rsa->setEncryptionMode(ENCRYPTION_PKCS1);
         return $rsa->encrypt($m);
         */
 
@@ -1279,7 +1255,7 @@ class Net_SSH1 {
         $length = strlen($modulus) - strlen($m) - 3;
         $random = '';
         while (strlen($random) != $length) {
-            $block = crypt_random_string($length - strlen($random));
+            $block = Random::crypt_random_string($length - strlen($random));
             $block = str_replace("\x00", '', $block);
             $random.= $block;
         }
