@@ -129,18 +129,16 @@ class SFTP extends SSH2 {
      *
      * @see Net_SFTP::Net_SFTP()
      * @var Array
-     * @access private
      */
-    var $packet_types = array();
+    private $packet_types = array();
 
     /**
      * Status Codes
      *
      * @see Net_SFTP::Net_SFTP()
      * @var Array
-     * @access private
      */
-    var $status_codes = array();
+    private $status_codes = array();
 
     /**
      * The Request ID
@@ -150,9 +148,8 @@ class SFTP extends SSH2 {
      *
      * @var Integer
      * @see Net_SFTP::_send_sftp_packet()
-     * @access private
      */
-    var $request_id = false;
+    private $request_id = false;
 
     /**
      * The Packet Type
@@ -164,34 +161,31 @@ class SFTP extends SSH2 {
      * @see Net_SFTP::_get_sftp_packet()
      * @access private
      */
-    var $packet_type = -1;
+    private $packet_type = -1;
 
     /**
      * Packet Buffer
      *
      * @var String
      * @see Net_SFTP::_get_sftp_packet()
-     * @access private
      */
-    var $packet_buffer = '';
+    private $packet_buffer = '';
 
     /**
      * Extensions supported by the server
      *
      * @var Array
      * @see Net_SFTP::_initChannel()
-     * @access private
      */
-    var $extensions = array();
+    private $extensions = array();
 
     /**
      * Server SFTP version
      *
      * @var Integer
      * @see Net_SFTP::_initChannel()
-     * @access private
      */
-    var $version;
+    private $version;
 
     /**
      * Current working directory
@@ -199,27 +193,24 @@ class SFTP extends SSH2 {
      * @var String
      * @see Net_SFTP::_realpath()
      * @see Net_SFTP::chdir()
-     * @access private
      */
-    var $pwd = false;
+    private $pwd = false;
 
     /**
      * Packet Type Log
      *
      * @see Net_SFTP::getLog()
      * @var Array
-     * @access private
      */
-    var $packet_type_log = array();
+    private $packet_type_log = array();
 
     /**
      * Packet Log
      *
      * @see Net_SFTP::getLog()
      * @var Array
-     * @access private
      */
-    var $packet_log = array();
+    private $packet_log = array();
 
     /**
      * Error information
@@ -227,23 +218,21 @@ class SFTP extends SSH2 {
      * @see Net_SFTP::getSFTPErrors()
      * @see Net_SFTP::getLastSFTPError()
      * @var String
-     * @access private
      */
-    var $sftp_errors = array();
+    private $sftp_errors = array();
 
     /**
      * Directory Cache
      *
      * Rather than always having to open a directory and close it immediately there after to see if a file is a directory or
-     * rather than always 
+     * rather than always
      *
      * @see Net_SFTP::_save_dir()
      * @see Net_SFTP::_remove_dir()
      * @see Net_SFTP::_is_dir()
      * @var Array
-     * @access private
      */
-    var $dirs = array();
+    private $dirs = array();
 
     /**
      * Default Constructor.
@@ -253,12 +242,10 @@ class SFTP extends SSH2 {
      * @param String $host
      * @param optional Integer $port
      * @param optional Integer $timeout
-     * @return SFTP
-     * @access public
      */
-    function Net_SFTP($host, $port = 22, $timeout = 10)
+    public function __construct($host, $port = 22, $timeout = 10)
     {
-        parent::Net_SSH2($host, $port, $timeout);
+        parent::__construct($host, $port, $timeout);
         $this->packet_types = array(
             1  => 'NET_SFTP_INIT',
             2  => 'NET_SFTP_VERSION',
