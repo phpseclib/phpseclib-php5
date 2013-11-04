@@ -151,7 +151,6 @@ class SCP {
      * @param String $data
      * @param optional Integer $mode
      * @return Boolean
-     * @access public
      */
     public function put($remote_file, $data, $mode = self::NET_SCP_STRING)
     {
@@ -266,7 +265,7 @@ class SCP {
     {
         switch ($this->mode) {
             case self::NET_SCP_SSH2:
-                $this->ssh->_send_channel_packet(SSH2::NET_SSH2_CHANNEL_EXEC, $data);
+                $this->ssh->_send_channel_packet(SSH2::SSH2_CHANNEL_EXEC, $data);
                 break;
             case self::NET_SCP_SSH1:
                 $data = pack('CNa*', SSH1::NET_SSH1_CMSG_STDIN_DATA, strlen($data), $data);
@@ -283,7 +282,7 @@ class SCP {
     {
         switch ($this->mode) {
             case self::NET_SCP_SSH2:
-                return $this->ssh->_get_channel_packet(SSH2::NET_SSH2_CHANNEL_EXEC, true);
+                return $this->ssh->_get_channel_packet(SSH2::SSH2_CHANNEL_EXEC, true);
             case self::NET_SCP_SSH1:
                 if (!$this->ssh->bitmap) {
                     return false;
@@ -316,7 +315,7 @@ class SCP {
     {
         switch ($this->mode) {
             case self::NET_SCP_SSH2:
-                $this->ssh->_close_channel(self::NET_SSH2_CHANNEL_EXEC);
+                $this->ssh->_close_channel(SSH2::SSH2_CHANNEL_EXEC);
                 break;
             case self::NET_SCP_SSH1:
                 $this->ssh->disconnect();
