@@ -560,10 +560,6 @@ class Hash {
      */
     function _sha512($m)
     {
-        if (!class_exists('BigInteger')) {
-            require_once('Math/BigInteger.php');
-        }
-
         static $init384, $init512, $k;
 
         if (!isset($k)) {

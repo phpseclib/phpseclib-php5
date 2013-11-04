@@ -450,19 +450,6 @@ class SSH1 {
      */
     function Net_SSH1($host, $port = 22, $timeout = 10, $cipher = NET_SSH1_CIPHER_3DES)
     {
-        if (!class_exists('BigInteger')) {
-            require_once('Math/BigInteger.php');
-        }
-
-        // Include Crypt_Random
-        // the class_exists() will only be called if the Random::crypt_random_string function hasn't been defined and
-        // will trigger a call to __autoload() if you're wanting to auto-load classes
-        // call function_exists() a second time to stop the require_once from being called outside
-        // of the auto loader
-        if (!function_exists('Random::crypt_random_string') && !class_exists('Crypt_Random') && !function_exists('Random::crypt_random_string')) {
-            require_once('Crypt/Random.php');
-        }
-
         $this->protocol_flags = array(
             1  => 'NET_SSH1_MSG_DISCONNECT',
             2  => 'NET_SSH1_SMSG_PUBLIC_KEY',
@@ -604,27 +591,18 @@ class SSH1 {
             //    $this->crypto = new Crypt_Null();
             //    break;
             case NET_SSH1_CIPHER_DES:
-                if (!class_exists('DES')) {
-                    require_once('Crypt/DES.php');
-                }
                 $this->crypto = new Crypt_DES();
                 $this->crypto->disablePadding();
                 $this->crypto->enableContinuousBuffer();
                 $this->crypto->setKey(substr($session_key, 0,  8));
                 break;
             case NET_SSH1_CIPHER_3DES:
-                if (!class_exists('TripleDES')) {
-                    require_once('Crypt/TripleDES.php');
-                }
                 $this->crypto = new Crypt_TripleDES(CRYPT_DES_MODE_3CBC);
                 $this->crypto->disablePadding();
                 $this->crypto->enableContinuousBuffer();
                 $this->crypto->setKey(substr($session_key, 0, 24));
                 break;
             //case NET_SSH1_CIPHER_RC4:
-            //    if (!class_exists('RC4')) {
-            //        require_once('Crypt/RC4.php');
-            //    }
             //    $this->crypto = new RC4();
             //    $this->crypto->enableContinuousBuffer();
             //    $this->crypto->setKey(substr($session_key, 0,  16));
@@ -1254,10 +1232,6 @@ class SSH1 {
     function _rsa_crypt($m, $key)
     {
         /*
-        if (!class_exists('RSA')) {
-            require_once('Crypt/RSA.php');
-        }
-
         $rsa = new RSA();
         $rsa->loadKey($key, PUBLIC_FORMAT_RAW);
         $rsa->setEncryptionMode(ENCRYPTION_PKCS1);

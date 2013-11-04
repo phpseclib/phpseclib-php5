@@ -136,9 +136,6 @@ class Stream {
      */
     function Net_SFTP_Stream()
     {
-        if (!class_exists('SFTP')) {
-            require_once('Net/SFTP.php');
-        }
     }
 
     /**

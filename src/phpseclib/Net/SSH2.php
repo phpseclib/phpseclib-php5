@@ -3106,10 +3106,6 @@ class SSH2 {
                 $temp = unpack('Nlength', $this->_string_shift($signature, 4));
                 $signature = $this->_string_shift($signature, $temp['length']);
 
-                if (!class_exists('RSA')) {
-                    require_once('Crypt/RSA.php');
-                }
-
                 $rsa = new RSA();
                 $rsa->setSignatureMode(RSA_SIGNATURE_PKCS1);
                 $rsa->loadKey(array('e' => $e, 'n' => $n), RSA_PUBLIC_FORMAT_RAW);

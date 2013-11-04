@@ -861,9 +861,6 @@ class RSA {
                     $iv = Random::crypt_random_string(8);
                     $symkey = pack('H*', md5($this->password . $iv)); // symkey is short for symmetric key
                     $symkey.= substr(pack('H*', md5($symkey . $this->password . $iv)), 0, 8);
-                    if (!class_exists('TripleDES')) {
-                        require_once('Crypt/TripleDES.php');
-                    }
                     $des = new TripleDES();
                     $des->setKey($symkey);
                     $des->setIV($iv);
@@ -1279,9 +1276,6 @@ class RSA {
 
                 switch ($encryption) {
                     case 'aes256-cbc':
-                        if (!class_exists('AES')) {
-                            require_once('Crypt/AES.php');
-                        }
                         $symkey = '';
                         $sequence = 0;
                         while (strlen($symkey) < 32) {

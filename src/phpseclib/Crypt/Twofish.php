@@ -58,15 +58,6 @@ namespace PhpSecLib\Crypt;
  */
 
 /**
- * Include Base
- *
- * Base cipher class
- */
-if (!class_exists('Base')) {
-    require_once('Base.php');
-}
-
-/**
  * Pure-PHP implementation of Twofish.
  *
  * @author  Jim Wigginton <terrafrost@php.net>

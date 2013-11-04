@@ -233,9 +233,6 @@ class ASN1 {
         static $static_init = null;
         if (!$static_init) {
             $static_init = true;
-            if (!class_exists('BigInteger')) {
-                require_once('Math/BigInteger.php');
-            }
         }
     }
 

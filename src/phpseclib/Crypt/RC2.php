@@ -54,14 +54,6 @@ namespace PhpSecLib\Crypt;
  * @link       http://phpseclib.sourceforge.net
  */
 
-/**
- * Include Base
- *
- * Base cipher class
- */
-if (!class_exists('Base')) {
-    require_once('Base.php');
-}
 
 /**#@+
  * @access public
