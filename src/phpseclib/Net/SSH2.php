@@ -1794,7 +1794,7 @@ class SSH2 {
         }
 
         $packet = $part1 . chr(1) . $part2;
-        $privateKey->setSignatureMode(RSA_SIGNATURE_PKCS1);
+        $privateKey->setSignatureMode(RSA::SIGNATURE_PKCS1);
         $signature = $privateKey->sign(pack('Na*a*', strlen($this->session_id), $this->session_id, $packet));
         $signature = pack('Na*Na*', strlen('ssh-rsa'), 'ssh-rsa', strlen($signature), $signature);
         $packet.= pack('Na*', strlen($signature), $signature);
@@ -1854,7 +1854,7 @@ class SSH2 {
      * In all likelihood, this is not a feature you want to be taking advantage of.
      *
      * @param String $command
-     * @param optional Boolean $block
+     * @param null $callback
      * @return String
      */
     public function exec($command, $callback = null)
@@ -2248,6 +2248,7 @@ class SSH2 {
      * Because some binary packets need to be ignored...
      *
      * @see SSH2::_get_binary_packet()
+     * @param $payload
      * @return String
      */
     private function _filter($payload)
@@ -2628,7 +2629,9 @@ class SSH2 {
      *
      * Makes sure that only the last 1MB worth of packets will be logged
      *
-     * @param String $data
+     * @param $message_number
+     * @param $message
+     * @internal param String $data
      */
     private function _append_log($message_number, $message)
     {
