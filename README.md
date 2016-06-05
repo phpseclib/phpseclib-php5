@@ -2,8 +2,8 @@
 
 > ## Abandoned! Or, rather, rebranded!
 >
-> ABANDONED in favour of the php5 branch in the phpseclib repository.
->  https://github.com/phpseclib/phpseclib/tree/php5
+> ABANDONED in favour of the 2.0 branch in the phpseclib repository.
+>  https://github.com/phpseclib/phpseclib/tree/2.0
 >
 
 
